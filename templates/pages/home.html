@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پی بریج — پرداخت‌های بین‌المللی آسان و مطمئن</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --pb-primary: #0d6efd;
+            --pb-dark: #0a1628;
+            --pb-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+        }
+
+        body {
+            font-family: 'Vazirmatn', system-ui, sans-serif;
+            color: #212529;
+        }
+
+        .navbar {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+        }
+
+        .hero {
+            background: var(--pb-gradient);
+            color: #fff;
+            padding: 6rem 0 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 0%, transparent 50%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50rem;
+            padding: 0.35rem 1rem;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+            font-weight: 800;
+        }
+
+        .service-card {
+            border: 1px solid #e9ecef;
+            border-radius: 1rem;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(13, 110, 253, 0.12);
+        }
+
+        .service-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 0.75rem;
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--pb-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .why-section {
+            background: #f8f9fa;
+        }
+
+        .why-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .why-icon {
+            flex-shrink: 0;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            background: var(--pb-gradient);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .contact-section {
+            background: var(--pb-dark);
+            color: #fff;
+            border-radius: 1.5rem;
+            padding: 4rem 2rem;
+        }
+
+        .contact-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .contact-info-item i {
+            font-size: 1.25rem;
+            color: var(--pb-primary);
+        }
+
+        .footer {
+            background: var(--pb-dark);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 2rem 0;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top border-bottom">
+        <div class="container">
+            <a class="navbar-brand text-primary" href="#">
+                <i class="bi bi-globe2 ms-1"></i>پی بریج
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="#services">خدمات</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#why">چرا ما</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 me-lg-2" href="#contact">تماس با ما</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <span class="hero-badge">
+                        <i class="bi bi-shield-check ms-1"></i>پلتفرم معتبر پرداخت‌های بین‌المللی
+                    </span>
+                    <h1 class="display-4 fw-bold mb-3">پرداخت‌های بین‌المللی،<br>بدون پیچیدگی</h1>
+                    <p class="lead mb-4 opacity-75">
+                        پی بریج راهکاری امن و حرفه‌ای برای دانشجویان و خانواده‌هاست تا پرداخت‌های
+                        شهریه دانشگاه، ثبت‌نام آزمون‌ها و سایر هزینه‌های بین‌المللی را
+                        به‌صورت سریع، شفاف و مطمئن انجام دهند.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{% url 'order_create' %}" class="btn btn-light btn-lg px-4">ثبت سفارش</a>
+                        <a href="#services" class="btn btn-outline-light btn-lg px-4">مشاهده خدمات</a>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block text-center mt-4 mt-lg-0">
+                    <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                        <i class="bi bi-credit-card-2-front display-1 opacity-75"></i>
+                        <p class="mt-3 mb-0 opacity-75">امن · سریع · جهانی</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services" class="py-5">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="section-title display-6">خدمات ما</h2>
+                <p class="text-muted mx-auto" style="max-width: 560px;">
+                    تمامی پرداخت‌های بین‌المللی مورد نیاز شما — از شهریه دانشگاه تا هزینه‌های سفارت —
+                    در یک پلتفرم مطمئن و یکپارچه.
+                </p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="bi bi-file-earmark-text"></i></div>
+                        <h5 class="fw-semibold">پرداخت اپلیکیشن فی دانشگاه</h5>
+                        <p class="text-muted mb-0">پرداخت مستقیم هزینه اپلیکیشن به دانشگاه‌های معتبر جهانی با تأییدیه فوری و پیگیری آنلاین.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="bi bi-mortarboard"></i></div>
+                        <h5 class="fw-semibold">پرداخت شهریه دانشگاه</h5>
+                        <p class="text-muted mb-0">انتقال امن شهریه با نرخ ارز رقابتی، رسید رسمی و سابقه کامل تراکنش برای ارائه به دانشگاه.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="bi bi-translate"></i></div>
+                        <h5 class="fw-semibold">ثبت نام آزمون TOEFL</h5>
+                        <p class="text-muted mb-0">ثبت‌نام و پرداخت هزینه آزمون تافل بدون درگیری با سیستم‌های بانکی پیچیده بین‌المللی.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="bi bi-journal-check"></i></div>
+                        <h5 class="fw-semibold">ثبت نام آزمون GRE</h5>
+                        <p class="text-muted mb-0">تکمیل ثبت‌نام و پرداخت آزمون GRE در کوتاه‌ترین زمان با پشتیبانی از ارزهای مختلف.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="bi bi-building"></i></div>
+                        <h5 class="fw-semibold">پرداخت هزینه سفارت</h5>
+                        <p class="text-muted mb-0">پرداخت هزینه‌های ویزا و خدمات سفارت به‌صورت دقیق و مطابق با الزامات رسمی سفارت‌ها.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="bi bi-globe-americas"></i></div>
+                        <h5 class="fw-semibold">سایر پرداخت های بین المللی</h5>
+                        <p class="text-muted mb-0">پرداخت هرگونه هزینه بین‌المللی دیگر — با مشاوره تخصصی و راهنمایی گام‌به‌گام توسط تیم ما.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section id="why" class="why-section py-5">
+        <div class="container py-4">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-5">
+                    <h2 class="section-title display-6 mb-3">چرا پی بریج؟</h2>
+                    <p class="text-muted">
+                        پی بریج برای دانشجویان و خانواده‌هایی طراحی شده که به دنبال راهی ساده،
+                        شفاف و امن برای انتقال وجه بین‌المللی هستند — بدون استرس و بدون ابهام.
+                    </p>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <div class="why-item">
+                                <div class="why-icon"><i class="bi bi-lock-fill"></i></div>
+                                <div>
+                                    <h6 class="fw-semibold mb-1">امنیت در سطح بانکی</h6>
+                                    <p class="text-muted small mb-0">رمزنگاری پیشرفته و رعایت استانداردهای بین‌المللی حفاظت از اطلاعات مالی.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="why-item">
+                                <div class="why-icon"><i class="bi bi-lightning-fill"></i></div>
+                                <div>
+                                    <h6 class="fw-semibold mb-1">پردازش سریع</h6>
+                                    <p class="text-muted small mb-0">بیشتر تراکنش‌ها ظرف ۲۴ تا ۴۸ ساعت تأیید می‌شوند، نه هفته‌ها.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="why-item">
+                                <div class="why-icon"><i class="bi bi-currency-exchange"></i></div>
+                                <div>
+                                    <h6 class="fw-semibold mb-1">نرخ‌های شفاف</h6>
+                                    <p class="text-muted small mb-0">مشاهده هزینه نهایی از ابتدا — بدون کارمزد پنهان یا کسر غیرمنتظره.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="why-item">
+                                <div class="why-icon"><i class="bi bi-headset"></i></div>
+                                <div>
+                                    <h6 class="fw-semibold mb-1">پشتیبانی اختصاصی</h6>
+                                    <p class="text-muted small mb-0">تیم متخصص ما در تمام مراحل پرداخت بین‌المللی شما همراه و راهنماست.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us -->
+    <section id="contact" class="py-5">
+        <div class="container py-2">
+            <div class="contact-section">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6 text-center text-lg-start">
+                        <h2 class="section-title display-6 mb-3">تماس با ما</h2>
+                        <p class="mb-4 opacity-75">
+                            سوالی درباره پرداخت بین‌المللی دارید؟ تیم پی بریج آماده پاسخگویی
+                            و راهنمایی شما در هر مرحله است. همین حالا با ما در ارتباط باشید.
+                        </p>
+                        <div class="d-flex flex-column gap-3 align-items-center align-items-lg-start">
+                            <div class="contact-info-item">
+                                <i class="bi bi-telephone-fill"></i>
+                                <span>۰۲۱-۱۲۳۴۵۶۷۸</span>
+                            </div>
+                            <div class="contact-info-item">
+                                <i class="bi bi-envelope-fill"></i>
+                                <span>info@paybridge.ir</span>
+                            </div>
+                            <div class="contact-info-item">
+                                <i class="bi bi-clock-fill"></i>
+                                <span>شنبه تا پنج‌شنبه، ۹ صبح تا ۶ عصر</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <form class="row g-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">نام و نام خانوادگی</label>
+                                <input type="text" class="form-control" id="name" placeholder="نام خود را وارد کنید">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">شماره تماس</label>
+                                <input type="tel" class="form-control" id="phone" placeholder="۰۹۱۲۳۴۵۶۷۸۹">
+                            </div>
+                            <div class="col-12">
+                                <label for="email" class="form-label">ایمیل</label>
+                                <input type="email" class="form-control" id="email" placeholder="example@email.com">
+                            </div>
+                            <div class="col-12">
+                                <label for="message" class="form-label">پیام شما</label>
+                                <textarea class="form-control" id="message" rows="4" placeholder="درخواست یا سوال خود را بنویسید..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">ارسال پیام</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer text-center">
+        <div class="container">
+            <p class="mb-0">© ۱۴۰۵ پی بریج. تمامی حقوق محفوظ است.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
