@@ -151,7 +151,7 @@ class OTPCode(models.Model):
         verbose_name = 'کد یکبار مصرف'
         verbose_name_plural = 'کدهای یکبار مصرف'
         indexes = [
-            models.Index(fields=['phone', 'purpose'], name='accounts_otpcode_phone_purpose_idx'),
+            models.Index(fields=['phone', 'purpose'], name='otp_phone_purpose_idx'),
         ]
 
     def __str__(self):
