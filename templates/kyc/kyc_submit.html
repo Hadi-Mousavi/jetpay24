@@ -1,0 +1,665 @@
+{% load kyc_filters %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>احراز هویت (KYC) — جت‌پی‌۲۴</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    {% if not is_locked %}
+    <link href="https://cdn.jsdelivr.net/npm/@majidh1/jalalidatepicker@0.9.12/dist/jalalidatepicker.min.css" rel="stylesheet">
+    {% endif %}
+    <style>
+        :root {
+            --jp-primary-dark:    #1F2A60;
+            --jp-primary-medium: #3C5A8C;
+            --jp-primary-light:  #3D95BE;
+            --jp-primary-lighter:#67B0D4;
+            --jp-primary-lightest:#8FC0DB;
+            --jp-dark:           #0A1628;
+            --jp-gradient:       linear-gradient(135deg, var(--jp-primary-dark) 0%, var(--jp-primary-lighter) 100%);
+            --jp-radius-lg:      1.25rem;
+            --jp-radius-sm:      0.6rem;
+            --jp-shadow-sm:      0 4px 12px rgba(0,0,0,.08);
+            --jp-shadow-md:      0 8px 24px rgba(0,0,0,.12);
+            --jp-ease:           all 0.2s ease-in-out;
+        }
+
+        body {
+            font-family: 'Vazirmatn', system-ui, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Navbar ─────────────────────────────────── */
+        .navbar {
+            backdrop-filter: blur(8px);
+            background: rgba(255,255,255,.8) !important;
+            border-bottom: 1px solid rgba(0,0,0,.08);
+        }
+        .navbar-brand { font-weight: 800; color: var(--jp-primary-dark) !important; }
+        .navbar .nav-link { color: #495057; transition: var(--jp-ease); }
+        .navbar .nav-link:hover { color: var(--jp-primary-dark); }
+
+        /* ── Sidebar ────────────────────────────────── */
+        .sidebar {
+            background: rgba(255,255,255,.9);
+            border-left: 1px solid rgba(0,0,0,.08);
+            min-height: calc(100vh - 57px);
+            width: 240px;
+            flex-shrink: 0;
+            padding: 1.75rem 0;
+        }
+        .sidebar-heading {
+            font-size: .7rem; font-weight: 700; letter-spacing: .08em;
+            text-transform: uppercase; color: #adb5bd;
+            padding: 0 1.25rem; margin-bottom: .5rem;
+        }
+        .sidebar-link {
+            display: flex; align-items: center; gap: .65rem;
+            padding: .6rem 1.25rem; color: #495057;
+            text-decoration: none; font-size: .9rem; font-weight: 500;
+            border-radius: var(--jp-radius-sm); transition: var(--jp-ease);
+        }
+        .sidebar-link:hover { background: rgba(143,192,219,.2); color: var(--jp-primary-dark); }
+        .sidebar-link.active {
+            background: var(--jp-primary-lightest); color: var(--jp-primary-dark);
+            font-weight: 600; border-right: 3px solid var(--jp-primary-medium);
+        }
+        .sidebar-link i { font-size: 1.1rem; width: 1.4rem; text-align: center; }
+
+        /* ── Layout ─────────────────────────────────── */
+        .dash-wrapper { flex: 1; display: flex; }
+        .dash-main    { flex: 1; padding: 2rem 1.75rem; max-width: 1020px; }
+
+        /* ── Cards ──────────────────────────────────── */
+        .info-card {
+            background: rgba(255,255,255,.9);
+            border-radius: var(--jp-radius-lg);
+            border: 1px solid rgba(0,0,0,.08);
+            padding: 1.5rem 1.75rem;
+            box-shadow: var(--jp-shadow-sm);
+        }
+        .info-card-title {
+            font-size: .75rem; font-weight: 700; letter-spacing: .06em;
+            text-transform: uppercase; color: #adb5bd; margin-bottom: 1rem;
+        }
+        .info-row {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .55rem 0; border-bottom: 1px solid #f1f3f5; font-size: .9rem;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row i { color: var(--jp-primary-medium); font-size: 1rem; width: 1.25rem; text-align: center; flex-shrink: 0; }
+        .info-label { color: #6c757d; min-width: 5.5rem; }
+        .info-value { font-weight: 500; }
+
+        /* ── Guide image card ────────────────────────── */
+        .guide-card {
+            background: #edf2f7;
+            border-radius: var(--jp-radius-lg);
+            border: 1px solid rgba(0,0,0,.08);
+            box-shadow: var(--jp-shadow-md);
+            position: sticky;
+            top: 1rem;
+            overflow: hidden;   /* clips image to card's border-radius */
+            padding: 0;         /* image fills edge-to-edge */
+        }
+        .guide-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            background: #edf2f7;
+        }
+        .guide-card-label {
+            padding: .6rem 1rem;
+            text-align: center;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: #adb5bd;
+            background: rgba(255,255,255,.9);
+            border-top: 1px solid rgba(0,0,0,.06);
+        }
+
+        /* ── KYC status badges ───────────────────────── */
+        .kyc-badge {
+            display: inline-flex; align-items: center; gap: .4rem;
+            border-radius: 50rem; padding: .3rem .85rem;
+            font-size: .8rem; font-weight: 600;
+        }
+        .kyc-badge.not-submitted { background: #e9ecef; color: #495057; }
+        .kyc-badge.pending  { background: var(--jp-primary-lightest); color: var(--jp-primary-dark); }
+        .kyc-badge.approved { background: #d1e7dd; color: #0a3622; }
+        .kyc-badge.rejected { background: #f8d7da; color: #58151c; }
+
+        /* ── Lock banners ────────────────────────────── */
+        .lock-banner {
+            border-radius: var(--jp-radius-lg);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .lock-banner.approved {
+            background: linear-gradient(135deg,#d1fae5,#a7f3d0);
+            border: 1px solid #6ee7b7;
+        }
+        .lock-banner.approved h5 { color: #065f46; }
+        .lock-banner.approved p  { color: #047857; }
+        .lock-banner.pending {
+            background: linear-gradient(135deg,#dbeafe,#bfdbfe);
+            border: 1px solid #93c5fd;
+        }
+        .lock-banner.pending h5 { color: #1e3a8a; }
+        .lock-banner.pending p  { color: #1d4ed8; }
+        .lock-banner h5 { font-weight: 700; margin-bottom: .2rem; font-size: 1rem; }
+        .lock-banner p  { font-size: .875rem; margin-bottom: 0; }
+
+        /* ── Form elements ───────────────────────────── */
+        .form-label { font-weight: 600; font-size: .9rem; color: #344054; margin-bottom: .35rem; }
+        .form-control, .form-select {
+            border-radius: var(--jp-radius-sm);
+            border: 1px solid #dee2e6;
+            font-family: 'Vazirmatn', system-ui, sans-serif;
+            font-size: .9rem;
+            padding: .55rem .85rem;
+            transition: var(--jp-ease);
+        }
+        .form-control:focus {
+            border-color: var(--jp-primary-light);
+            box-shadow: 0 0 0 3px rgba(61,149,190,.15);
+        }
+        .btn-submit {
+            background: var(--jp-gradient); border: none; color: #fff;
+            font-weight: 600; padding: .65rem 2rem;
+            border-radius: var(--jp-radius-sm); font-size: .95rem;
+            box-shadow: var(--jp-shadow-sm); transition: var(--jp-ease);
+            font-family: 'Vazirmatn', system-ui, sans-serif;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: var(--jp-shadow-md); color: #fff; }
+
+        /* ── Image previews ──────────────────────────── */
+        .img-preview {
+            max-width: 200px; max-height: 140px; object-fit: cover;
+            border-radius: var(--jp-radius-sm); border: 1px solid #dee2e6;
+            margin-top: .5rem; display: block;
+        }
+        .img-preview-label { font-size: .78rem; color: #6c757d; margin-bottom: .25rem; }
+
+        /* ── Section titles ──────────────────────────── */
+        .form-section-title {
+            font-size: .8rem; font-weight: 700; letter-spacing: .05em;
+            text-transform: uppercase; color: #adb5bd;
+            margin: 1.5rem 0 1rem; padding-bottom: .4rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        /* ── Page header ─────────────────────────────── */
+        .page-header { margin-bottom: 1.5rem; }
+        .page-header h4 { font-weight: 700; color: var(--jp-primary-dark); margin-bottom: .25rem; }
+        .page-header p  { color: #6c757d; font-size: .875rem; margin-bottom: 0; }
+
+        /* ── Datepicker font override ─────────────────── */
+        .datepicker-plot-area { font-family: 'Vazirmatn', system-ui, sans-serif !important; }
+
+        /* ── Date-of-birth field: reserve space for the calendar icon ── */
+        /* The icon sits at left:.75rem inside the LTR input, so we push  */
+        /* the text start right to prevent overlap.                        */
+        .date-field-wrap .form-control {
+            padding-left: 2.2rem;
+        }
+
+        /* ── Misc ────────────────────────────────────── */
+        .alert  { border-radius: var(--jp-radius-sm); font-size: .9rem; }
+        .footer { background: var(--jp-dark); color: rgba(255,255,255,.6); padding: 1.5rem 0; font-size: .875rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg navbar-light border-bottom">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="/"><i class="bi bi-globe2 ms-1"></i>جت‌پی‌۲۴</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navKyc">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navKyc">
+            <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+                <li class="nav-item">
+                    <span class="nav-link text-muted d-flex align-items-center gap-2 fw-semibold" style="font-size:.95rem;">
+                        <i class="bi bi-person-circle" style="font-size:1.4rem;position:relative;top:3px;"></i>
+                        {{ user.get_full_name }}
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left ms-1"></i>خروج</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ── Body ────────────────────────────────────────────────────────────── -->
+<div class="dash-wrapper">
+
+    <!-- Sidebar -->
+    <aside class="sidebar d-none d-md-flex flex-column">
+        <div class="sidebar-heading">منو</div>
+        <a href="{% url 'dashboard' %}" class="sidebar-link"><i class="bi bi-grid-1x2"></i>داشبورد</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-person"></i>پروفایل</a>
+        <a href="{% url 'kyc_submit' %}" class="sidebar-link active"><i class="bi bi-shield-check"></i>احراز هویت (KYC)</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-receipt"></i>سفارش‌های من</a>
+    </aside>
+
+    <!-- Main -->
+    <main class="dash-main">
+
+        <!-- Flash messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Page header -->
+        <div class="page-header">
+            <h4><i class="bi bi-shield-check me-2"></i>احراز هویت (KYC)</h4>
+            {% if is_locked %}
+                {% if kyc_profile.is_approved %}
+                    <p>اطلاعات هویتی شما تأیید و قفل شده است.</p>
+                {% else %}
+                    <p>مدارک شما در حال بررسی است. تا اعلام نتیجه، فرم قابل ویرایش نیست.</p>
+                {% endif %}
+            {% else %}
+                <p>برای استفاده کامل از خدمات جت‌پی‌۲۴، اطلاعات هویتی و مدارک خود را بارگذاری کنید.</p>
+            {% endif %}
+        </div>
+
+        {#LOCKED VIEW  (pending or approved)#}
+        {% if is_locked %}
+
+            <!-- Lock banner -->
+            {% if kyc_profile.is_approved %}
+                <div class="lock-banner approved">
+                    <h5><i class="bi bi-patch-check-fill me-2"></i>احراز هویت شما تأیید شده است.</h5>
+                    <p>برای تغییر اطلاعات با پشتیبانی تماس بگیرید.</p>
+                </div>
+            {% else %}
+                <div class="lock-banner pending">
+                    <h5><i class="bi bi-hourglass-split me-2"></i>مدارک شما در انتظار بررسی است.</h5>
+                    <p>تا زمان اعلام نتیجه توسط تیم احراز هویت، امکان ویرایش وجود ندارد.</p>
+                </div>
+            {% endif %}
+
+            <!-- Read-only data -->
+            {% if kyc_settings and kyc_settings.guide_image %}
+            <div class="row g-4 align-items-start">
+                <div class="col-lg-7">
+            {% endif %}
+
+                    <div class="info-card">
+                        <div class="info-card-title">اطلاعات ثبت‌شده</div>
+                        <div class="info-row">
+                            <i class="bi bi-card-text"></i>
+                            <span class="info-label">کد ملی</span>
+                            <span class="info-value" dir="ltr">{{ kyc_profile.national_id|to_persian_digits }}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="bi bi-calendar3"></i>
+                            <span class="info-label">تاریخ تولد</span>
+                            <span class="info-value" dir="ltr">
+                                {% if kyc_profile.date_of_birth %}{{ kyc_profile.date_of_birth|to_jalali }}{% else %}<span class="text-muted">—</span>{% endif %}
+                            </span>
+                        </div>
+                        {% if kyc_profile.national_id_image or kyc_profile.selfie_image %}
+                            <div class="form-section-title">مدارک تصویری</div>
+                            <div class="row g-3 mt-1">
+                                {% if kyc_profile.national_id_image %}
+                                    <div class="col-sm-6">
+                                        <p class="img-preview-label">تصویر کارت ملی:</p>
+                                        <a href="{{ kyc_profile.national_id_image.url }}" target="_blank" rel="noopener">
+                                            <img src="{{ kyc_profile.national_id_image.url }}" alt="کارت ملی" class="img-preview">
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                {% if kyc_profile.selfie_image %}
+                                    <div class="col-sm-6">
+                                        <p class="img-preview-label">سلفی با کارت ملی:</p>
+                                        <a href="{{ kyc_profile.selfie_image.url }}" target="_blank" rel="noopener">
+                                            <img src="{{ kyc_profile.selfie_image.url }}" alt="سلفی" class="img-preview">
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+            {% if kyc_settings and kyc_settings.guide_image %}
+                </div>{# col-lg-7 #}
+                <div class="col-lg-5">
+                    <div class="guide-card">
+                        <img src="{{ kyc_settings.guide_image.url }}" alt="راهنمای احراز هویت">
+                        <div class="guide-card-label">راهنمای احراز هویت</div>
+                    </div>
+                </div>
+            </div>{# /row #}
+            {% endif %}
+
+        {#EDITABLE FORM  (not_submitted or rejected)#}
+        {% else %}
+
+            <!-- Status badge -->
+            <div class="info-card mb-4">
+                <div class="info-card-title">وضعیت فعلی</div>
+                <div class="d-flex align-items-center gap-3">
+                    {% if kyc_profile.is_rejected %}
+                        <span class="kyc-badge rejected">
+                            <i class="bi bi-x-circle-fill"></i> رد شده
+                        </span>
+                        <span class="text-muted" style="font-size:.85rem;">مدارک رد شده‌اند. اطلاعات را ویرایش و مجدداً ارسال کنید.</span>
+                    {% else %}
+                        <span class="kyc-badge not-submitted">
+                            <i class="bi bi-question-circle"></i> هنوز آغاز نشده
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Two-column layout when guide image is available -->
+            {% if kyc_settings and kyc_settings.guide_image %}
+            <div class="row g-4 align-items-start">
+                <div class="col-lg-7">
+            {% endif %}
+
+                    <!-- Form card -->
+                    <div class="info-card">
+                        <div class="info-card-title">فرم ارسال مدارک</div>
+
+                        <form method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+
+                            <div class="form-section-title">اطلاعات هویتی</div>
+                            <div class="row g-3">
+
+                                <!-- National ID -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.national_id.id_for_label }}" class="form-label">
+                                        {{ form.national_id.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.national_id }}
+                                    {% if form.national_id.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for e in form.national_id.errors %}{{ e }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">دقیقاً ۱۰ رقم — فارسی (۰-۹) یا لاتین (0-9) قابل قبول است</div>
+                                </div>
+
+                                <!-- Date of birth — Persian calendar picker -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">
+                                        {{ form.date_of_birth.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="position-relative date-field-wrap">
+                                        {{ form.date_of_birth }}
+                                        <span id="cal-trigger"
+                                              style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);cursor:pointer;color:#6c757d;font-size:1rem;line-height:1;z-index:4;">
+                                            <i class="bi bi-calendar3"></i>
+                                        </span>
+                                    </div>
+                                    {% if form.date_of_birth.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for e in form.date_of_birth.errors %}{{ e }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">مثال: ۱۳۷۰/۰۵/۲۲ — می‌توانید تایپ کنید یا از تقویم انتخاب کنید</div>
+                                </div>
+
+                            </div>
+
+                            <div class="form-section-title">بارگذاری مدارک</div>
+                            <div class="row g-4">
+
+                                <!-- National ID image -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.national_id_image.id_for_label }}" class="form-label">
+                                        {{ form.national_id_image.label }}
+                                    </label>
+                                    {{ form.national_id_image }}
+                                    {% if form.national_id_image.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for e in form.national_id_image.errors %}{{ e }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">فرمت‌های مجاز: JPG، PNG، WEBP</div>
+                                    {% if kyc_profile.national_id_image %}
+                                        <div class="mt-2">
+                                            <p class="img-preview-label">تصویر فعلی:</p>
+                                            <a href="{{ kyc_profile.national_id_image.url }}" target="_blank" rel="noopener">
+                                                <img src="{{ kyc_profile.national_id_image.url }}" alt="کارت ملی" class="img-preview">
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Selfie image -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.selfie_image.id_for_label }}" class="form-label">
+                                        {{ form.selfie_image.label }}
+                                    </label>
+                                    {{ form.selfie_image }}
+                                    {% if form.selfie_image.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for e in form.selfie_image.errors %}{{ e }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">عکس سلفی به همراه کارت ملی</div>
+                                    {% if kyc_profile.selfie_image %}
+                                        <div class="mt-2">
+                                            <p class="img-preview-label">تصویر فعلی:</p>
+                                            <a href="{{ kyc_profile.selfie_image.url }}" target="_blank" rel="noopener">
+                                                <img src="{{ kyc_profile.selfie_image.url }}" alt="سلفی" class="img-preview">
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger mt-3">
+                                    {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-4 d-flex align-items-center gap-3">
+                                <button type="submit" class="btn-submit">
+                                    <i class="bi bi-send-fill me-2"></i>ثبت و ارسال مدارک
+                                </button>
+                                <a href="{% url 'dashboard' %}" class="text-muted text-decoration-none" style="font-size:.875rem;">
+                                    <i class="bi bi-arrow-right-short"></i> بازگشت به داشبورد
+                                </a>
+                            </div>
+
+                        </form>
+                    </div>{# /info-card #}
+
+            {% if kyc_settings and kyc_settings.guide_image %}
+                </div>{# col-lg-7 #}
+                <div class="col-lg-5">
+                    <div class="guide-card">
+                        <img src="{{ kyc_settings.guide_image.url }}" alt="راهنمای احراز هویت">
+                        <div class="guide-card-label">راهنمای احراز هویت</div>
+                    </div>
+                </div>
+            </div>{# /row #}
+            {% endif %}
+
+        {% endif %}{# end locked/editable split #}
+
+    </main>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p class="mb-0">© ۱۴۰۵ جت‌پی‌۲۴. تمامی حقوق محفوظ است.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+{% if not is_locked %}
+<!-- @majidh1/jalalidatepicker v0.9.12 — zero-dependency Jalali calendar -->
+<script src="https://cdn.jsdelivr.net/npm/@majidh1/jalalidatepicker@0.9.12/dist/jalalidatepicker.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Shared: ASCII → Persian digit converter ──────────────────────────
+    // Used by both fields so all digit display is always Persian.
+    // The backend (clean_national_id + JalaliDateField.to_python) already
+    // calls _normalize_digits(), so it accepts Persian digits on submit —
+    // no pre-submit conversion is needed here.
+    function toFarsi(s) {
+        return String(s).replace(/[0-9]/g, function (d) {
+            return '۰۱۲۳۴۵۶۷۸۹'[+d];
+        });
+    }
+
+    // ── National ID field ────────────────────────────────────────────────
+    var nidInput = document.getElementById('{{ form.national_id.id_for_label }}');
+    if (nidInput) {
+        // Convert any initial value (e.g. pre-filled on GET) to Persian
+        if (nidInput.value) {
+            nidInput.value = toFarsi(
+                nidInput.value.replace(/[^0-9\u06F0-\u06F9]/g, '').substring(0, 10)
+            );
+        }
+        // On every keystroke / paste: strip non-digits, cap at 10, show Persian
+        nidInput.addEventListener('input', function () {
+            var pos    = this.selectionStart;
+            var digits = this.value.replace(/[^0-9\u06F0-\u06F9]/g, '').substring(0, 10);
+            var farsi  = toFarsi(digits);
+            if (this.value !== farsi) {
+                this.value = farsi;
+                // selectionStart is a character offset; lengths match 1-to-1
+                try { this.setSelectionRange(pos, pos); } catch (ex) {}
+            }
+        });
+    }
+
+    // ── Date of birth field ──────────────────────────────────────────────
+    var input   = document.getElementById('{{ form.date_of_birth.id_for_label }}');
+    var trigger = document.getElementById('cal-trigger');
+    if (!input) return;
+
+    // Formats a raw string to YYYY/MM/DD with Persian digits.
+    // Strips non-digit chars, caps at 8 digits, inserts slashes at positions
+    // 4 and 6.  Accepts both ASCII and Persian digits as input.
+    function formatJalaliInput(raw) {
+        var digits = toFarsi(raw.replace(/[^0-9\u06F0-\u06F9]/g, ''));
+        digits = digits.substring(0, 8);
+        if (!digits.length) return '';
+        var result = '';
+        for (var i = 0; i < digits.length; i++) {
+            if (i === 4 || i === 6) result += '/';
+            result += digits[i];
+        }
+        if (digits.length === 4 || digits.length === 6) result += '/';
+        return result;
+    }
+
+    // Normalise the field value through formatJalaliInput.
+    // Called on initial load and after the picker selects a date.
+    function normalizeDateDisplay() {
+        if (input.value) {
+            var fmt = formatJalaliInput(input.value);
+            if (fmt && input.value !== fmt) {
+                input.value = fmt;
+                lastLen = fmt.length;
+            }
+        }
+    }
+
+    // Convert any initial value (prepare_value already outputs Persian but
+    // this handles the edge case where it falls back to a plain string).
+    var skipFmt = false;
+    var lastLen = 0;
+    normalizeDateDisplay();
+
+    // Re-sync lastLen when the picker fills the field programmatically,
+    // so the very next keydown does not falsely look like a deletion.
+    input.addEventListener('focus', function () {
+        lastLen = this.value.length;
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' || e.key === 'Delete') skipFmt = true;
+    });
+
+    // Typing handler: auto-format + Persian digits
+    input.addEventListener('input', function () {
+        var curLen   = this.value.length;
+        var deleting = skipFmt || curLen < lastLen;
+        skipFmt = false;
+        lastLen = curLen;
+        if (deleting) return;
+
+        var oldVal = this.value;
+        var newVal = formatJalaliInput(oldVal);
+        if (oldVal !== newVal) {
+            var pos    = this.selectionStart;
+            this.value = newVal;
+            lastLen    = newVal.length;
+            var newPos = Math.min(pos + (newVal.length - oldVal.length), newVal.length);
+            try { this.setSelectionRange(newPos, newPos); } catch (ex) {}
+        }
+    });
+
+    // After the picker closes it may fire 'change' with ASCII digits.
+    // normalizeDateDisplay() converts whatever it wrote to Persian format.
+    input.addEventListener('change', normalizeDateDisplay);
+
+    // ── Initialise jalaliDatepicker ──────────────────────────────────────
+    var pickerReady = false;
+    if (typeof jalaliDatepicker !== 'undefined') {
+        input.setAttribute('data-jdp', '');
+        try {
+            jalaliDatepicker.startWatch();
+            pickerReady = true;
+        } catch (ex) {
+            console.warn('jalaliDatepicker.startWatch() failed:', ex.message);
+        }
+    } else {
+        console.warn('jalaliDatepicker library did not load — typing still works.');
+    }
+
+    // ── Calendar icon click ──────────────────────────────────────────────
+    if (trigger) {
+        trigger.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+        });
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (pickerReady) {
+                jalaliDatepicker.show(input);
+            } else {
+                input.focus();
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+
+</body>
+</html>

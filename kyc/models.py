@@ -7,25 +7,27 @@ class KYCProfile(models.Model):
     """
     Stores identity-verification data for a user.
 
-    Deliberately separated from the User model so that KYC state can evolve
-    independently (new document types, reviewer notes, re-submission flows)
-    without touching the core auth model.
+    Status lifecycle:
+        not_submitted  →  pending  →  approved
+                                   ↘  rejected  →  pending (re-submission)
 
-    A profile row is created on first KYC submission; until then no row
-    exists for a user, which is a clean sentinel for "never submitted".
-
-    Status lifecycle:  (none) → PENDING → APPROVED
-                                        ↘ REJECTED → PENDING (re-submission)
+    Lock rules:
+        not_submitted  →  editable, uploads allowed
+        rejected       →  editable, uploads allowed
+        pending        →  READ-ONLY (under review)
+        approved       →  READ-ONLY (permanently locked)
     """
 
-    STATUS_PENDING = 'pending'
+    STATUS_NOT_SUBMITTED = 'not_submitted'
+    STATUS_PENDING  = 'pending'
     STATUS_APPROVED = 'approved'
     STATUS_REJECTED = 'rejected'
 
     STATUS_CHOICES = [
-        (STATUS_PENDING, 'در انتظار بررسی'),
-        (STATUS_APPROVED, 'تأیید شده'),
-        (STATUS_REJECTED, 'رد شده'),
+        (STATUS_NOT_SUBMITTED, 'تکمیل نشده'),
+        (STATUS_PENDING,       'در انتظار بررسی'),
+        (STATUS_APPROVED,      'تأیید شده'),
+        (STATUS_REJECTED,      'رد شده'),
     ]
 
     user = models.OneToOneField(
@@ -52,21 +54,27 @@ class KYCProfile(models.Model):
         blank=True,
         verbose_name='تاریخ تولد',
     )
+    national_id_image = models.ImageField(
+        upload_to='kyc/documents/',
+        null=True,
+        blank=True,
+        verbose_name='تصویر کارت ملی',
+    )
+    selfie_image = models.ImageField(
+        upload_to='kyc/selfies/',
+        null=True,
+        blank=True,
+        verbose_name='سلفی با کارت ملی',
+    )
     status = models.CharField(
-        max_length=10,
+        max_length=13,
         choices=STATUS_CHOICES,
-        default=STATUS_PENDING,
+        default=STATUS_NOT_SUBMITTED,
         db_index=True,
         verbose_name='وضعیت',
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='تاریخ ثبت',
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='آخرین ویرایش',
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ثبت')
+    updated_at = models.DateTimeField(auto_now=True,     verbose_name='آخرین ویرایش')
 
     class Meta:
         verbose_name = 'پروفایل KYC'
@@ -79,14 +87,52 @@ class KYCProfile(models.Model):
     def __str__(self):
         return f'{self.user} — {self.get_status_display()}'
 
+    # ── status helpers ─────────────────────────────────────────────────────
+
     @property
-    def is_approved(self):
-        return self.status == self.STATUS_APPROVED
+    def is_not_submitted(self):
+        return self.status == self.STATUS_NOT_SUBMITTED
 
     @property
     def is_pending(self):
         return self.status == self.STATUS_PENDING
 
     @property
+    def is_approved(self):
+        return self.status == self.STATUS_APPROVED
+
+    @property
     def is_rejected(self):
         return self.status == self.STATUS_REJECTED
+
+    @property
+    def is_locked(self):
+        """True when the form must be read-only (pending review or fully approved)."""
+        return self.status in (self.STATUS_PENDING, self.STATUS_APPROVED)
+
+
+class KYCSiteSettings(models.Model):
+    """
+    Singleton that stores admin-managed site-wide KYC settings.
+    Only one row should exist; use KYCSiteSettings.get() to retrieve it.
+    """
+
+    guide_image = models.ImageField(
+        upload_to='kyc/guide/',
+        null=True,
+        blank=True,
+        verbose_name='تصویر راهنما',
+        help_text='این تصویر در صفحه احراز هویت کاربران نمایش داده می‌شود.',
+    )
+
+    class Meta:
+        verbose_name = 'تنظیمات KYC'
+        verbose_name_plural = 'تنظیمات KYC'
+
+    def __str__(self):
+        return 'تنظیمات KYC'
+
+    @classmethod
+    def get(cls):
+        """Return the singleton settings row, or None if not yet created."""
+        return cls.objects.first()

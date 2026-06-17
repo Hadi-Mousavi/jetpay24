@@ -1,108 +1,124 @@
 from django import forms
 
-from .models import Order
+from .models import Category, Order, OrderAttachment, OrderMessage, SubCategory
+from .utils import validate_upload
 
-SERVICE_LABELS = {
-    'APPLICATION_FEE': 'پرداخت اپلیکیشن فی دانشگاه',
-    'TUITION': 'پرداخت شهریه دانشگاه',
-    'TOEFL': 'ثبت نام آزمون TOEFL',
-    'GRE': 'ثبت نام آزمون GRE',
-    'VISA': 'پرداخت هزینه سفارت',
-    'OTHER': 'سایر پرداخت های بین المللی',
-}
-
-ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png'}
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+_INPUT   = 'form-control'
+_SELECT  = 'form-select'
 
 
-class OrderForm(forms.ModelForm):
+class OrderCreateForm(forms.ModelForm):
+
     class Meta:
-        model = Order
+        model  = Order
         fields = [
-            'name', 'phone', 'email', 'service_type',
-            'amount', 'description', 'document',
+            'category', 'subcategory',
+            'organization_name', 'amount', 'currency',
+            'deadline', 'description', 'customer_note',
+            # assigned_admin is intentionally excluded — admin-only field
         ]
         labels = {
-            'name': 'نام و نام خانوادگی',
-            'phone': 'شماره موبایل',
-            'email': 'ایمیل',
-            'service_type': 'نوع خدمت',
-            'amount': 'مبلغ دلاری',
-            'description': 'توضیحات',
-            'document': 'مدرک یا فایل پیوست',
+            'category':          'دسته‌بندی',
+            'subcategory':       'زیر دسته‌بندی',
+            'organization_name': 'نام سازمان / دانشگاه',
+            'amount':            'مبلغ',
+            'currency':          'ارز',
+            'deadline':          'ددلاین',
+            'description':       'توضیحات',
+            'customer_note':     'یادداشت مشتری',
         }
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control form-control-lg',
-                'placeholder': 'نام و نام خانوادگی خود را وارد کنید',
-            }),
-            'phone': forms.TextInput(attrs={
-                'class': 'form-control form-control-lg',
-                'placeholder': '۰۹۱۲۳۴۵۶۷۸۹',
-                'dir': 'ltr',
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'form-control form-control-lg',
-                'placeholder': 'example@email.com',
-                'dir': 'ltr',
-            }),
-            'service_type': forms.Select(attrs={
-                'class': 'form-select form-select-lg',
+            'category':          forms.Select(attrs={'class': _SELECT}),
+            'subcategory':       forms.Select(attrs={'class': _SELECT}),
+            'organization_name': forms.TextInput(attrs={
+                'class': _INPUT,
+                'placeholder': 'مثال: دانشگاه تورنتو',
             }),
             'amount': forms.NumberInput(attrs={
-                'class': 'form-control form-control-lg',
-                'placeholder': 'مثال: ۱۵۰',
-                'step': '0.01',
-                'min': '0.01',
-                'dir': 'ltr',
+                'class': _INPUT, 'step': '0.01', 'min': '0',
+                'dir': 'ltr', 'placeholder': '0.00',
+            }),
+            'currency': forms.TextInput(attrs={
+                'class': _INPUT, 'placeholder': 'USD',
+                'dir': 'ltr', 'maxlength': '10',
+            }),
+            'deadline': forms.DateInput(attrs={
+                'class': _INPUT, 'type': 'date', 'dir': 'ltr',
             }),
             'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'توضیحات تکمیلی درباره سفارش (اختیاری)',
-                'rows': 4,
+                'class': _INPUT, 'rows': 5,
+                'placeholder': 'جزئیات درخواست خود را شرح دهید…',
             }),
-            'document': forms.FileInput(attrs={
-                'class': 'form-control form-control-lg',
-                'accept': '.pdf,.jpg,.jpeg,.png',
+            'customer_note': forms.Textarea(attrs={
+                'class': _INPUT, 'rows': 3,
+                'placeholder': 'یادداشت یا نکته اضافی برای تیم جت‌پی‌۲۴ (اختیاری)',
             }),
-        }
-        error_messages = {
-            'name': {'required': 'لطفاً نام و نام خانوادگی را وارد کنید.'},
-            'phone': {'required': 'لطفاً شماره موبایل را وارد کنید.'},
-            'email': {'required': 'لطفاً ایمیل را وارد کنید.'},
-            'service_type': {'required': 'لطفاً نوع خدمت را انتخاب کنید.'},
-            'amount': {'required': 'لطفاً مبلغ دلاری را وارد کنید.'},
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['description'].required = False
-        self.fields['document'].required = False
-        self.fields['service_type'].choices = [
-            ('', '— انتخاب نوع خدمت —'),
-        ] + [
-            (value, SERVICE_LABELS.get(value, label))
-            for value, label in Order.SERVICE_CHOICES
-        ]
 
-    def clean_amount(self):
-        amount = self.cleaned_data['amount']
-        if amount <= 0:
-            raise forms.ValidationError('مبلغ باید بزرگ‌تر از صفر باشد.')
-        return amount
+        # Optional fields
+        for f in ('organization_name', 'amount', 'currency', 'deadline', 'customer_note'):
+            self.fields[f].required = False
 
-    def clean_document(self):
-        document = self.cleaned_data.get('document')
-        if not document:
-            return document
+        # Active categories only
+        self.fields['category'].queryset    = Category.objects.filter(is_active=True)
+        self.fields['category'].empty_label = '— انتخاب دسته‌بندی —'
 
-        extension = document.name.rsplit('.', 1)[-1].lower()
-        if extension not in ALLOWED_EXTENSIONS:
-            raise forms.ValidationError(
-                'فرمت فایل مجاز نیست. فقط PDF، JPG، JPEG و PNG پذیرفته می‌شود.'
+        # Subcategories populated via AJAX on the frontend; pre-populate on
+        # re-render after POST error or when editing an existing instance.
+        self.fields['subcategory'].empty_label = '— ابتدا دسته‌بندی را انتخاب کنید —'
+
+        if 'category' in self.data:
+            try:
+                cat_id = int(self.data['category'])
+                self.fields['subcategory'].queryset = SubCategory.objects.filter(
+                    category_id=cat_id, is_active=True,
+                )
+            except (ValueError, TypeError):
+                self.fields['subcategory'].queryset = SubCategory.objects.none()
+        elif self.instance.pk and self.instance.category_id:
+            self.fields['subcategory'].queryset = SubCategory.objects.filter(
+                category=self.instance.category, is_active=True,
             )
+        else:
+            self.fields['subcategory'].queryset = SubCategory.objects.none()
 
-        if document.size > MAX_FILE_SIZE:
-            raise forms.ValidationError('حجم فایل نباید بیشتر از ۱۰ مگابایت باشد.')
 
-        return document
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model  = OrderMessage
+        fields = ['message']
+        labels = {'message': ''}
+        widgets = {
+            'message': forms.Textarea(attrs={
+                'class': _INPUT, 'rows': 3,
+                'placeholder': 'پیام خود را بنویسید…',
+            }),
+        }
+
+
+class AttachmentForm(forms.ModelForm):
+    class Meta:
+        model  = OrderAttachment
+        fields = ['file', 'title']
+        labels = {'file': 'انتخاب فایل', 'title': 'عنوان فایل'}
+        widgets = {
+            'file': forms.FileInput(attrs={
+                'class': _INPUT,
+                'accept': 'image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip',
+            }),
+            'title': forms.TextInput(attrs={
+                'class': _INPUT, 'placeholder': 'عنوان فایل (اختیاری)',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].required = False
+
+    def clean_file(self):
+        f = self.cleaned_data.get('file')
+        validate_upload(f)
+        return f

@@ -129,8 +129,34 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 MEDIA_URL = config('MEDIA_URL', default='/media/')
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ---------------------------------------------------------------------------
+# Private media — NEVER served directly by the web server.
+# ---------------------------------------------------------------------------
+# Order attachments and message attachments live under PRIVATE_MEDIA_ROOT,
+# which is a sibling of MEDIA_ROOT and intentionally outside it.
+#
+# Security model:
+#   - No nginx/Apache alias must exist for this directory.
+#   - Django's static() helper in urls.py only serves MEDIA_ROOT, so
+#     PRIVATE_MEDIA_ROOT is unreachable through /media/ in every environment.
+#   - The only way to read a file is through the authenticated download views:
+#       orders.views.order_attachment_download
+#       orders.views.message_attachment_download
+#
+# Production checklist:
+#   □ nginx has NO location block for private_media/
+#   □ Apache has NO Alias directive for private_media/
+#   □ DEBUG=False in production
+#   □ PRIVATE_MEDIA_ROOT directory is NOT inside the document root
+# ---------------------------------------------------------------------------
+PRIVATE_MEDIA_ROOT = BASE_DIR / 'private_media'
 
 # ---------------------------------------------------------------------------
 # Default primary key field type
@@ -146,5 +172,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
 LOGIN_URL = '/auth/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'

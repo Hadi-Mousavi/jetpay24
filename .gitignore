@@ -9,8 +9,12 @@ __pycache__/
 # Database
 db.sqlite3
 
-# User-uploaded files
+# User-uploaded files (public media)
 media/
+
+# Private media — order attachments served only through authenticated views.
+# Must never be inside a web-server document root.
+private_media/
 
 # Python packaging
 *.egg-info/

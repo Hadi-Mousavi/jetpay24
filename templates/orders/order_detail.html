@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سفارش {{ order.order_number }} — جت‌پی‌۲۴</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --jp-primary-dark:    #1F2A60;
+            --jp-primary-medium: #3C5A8C;
+            --jp-primary-light:  #3D95BE;
+            --jp-primary-lighter:#67B0D4;
+            --jp-primary-lightest:#8FC0DB;
+            --jp-dark:           #0A1628;
+            --jp-gradient:       linear-gradient(135deg, var(--jp-primary-dark) 0%, var(--jp-primary-lighter) 100%);
+            --jp-radius-lg:      1.25rem;
+            --jp-radius-sm:      0.6rem;
+            --jp-shadow-sm:      0 4px 12px rgba(0,0,0,.08);
+            --jp-ease:           all 0.2s ease-in-out;
+        }
+        body { font-family:'Vazirmatn',system-ui,sans-serif; background:#f8f9fa; min-height:100vh; display:flex; flex-direction:column; }
+        .navbar { backdrop-filter:blur(8px); background:rgba(255,255,255,.8)!important; border-bottom:1px solid rgba(0,0,0,.08); }
+        .navbar-brand { font-weight:800; color:var(--jp-primary-dark)!important; }
+        .navbar .nav-link { color:#495057; }
+        .sidebar { background:rgba(255,255,255,.9); border-left:1px solid rgba(0,0,0,.08); min-height:calc(100vh - 57px); width:240px; flex-shrink:0; padding:1.75rem 0; }
+        .sidebar-heading { font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#adb5bd; padding:0 1.25rem; margin-bottom:.5rem; }
+        .sidebar-link { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.25rem; color:#495057; text-decoration:none; font-size:.9rem; font-weight:500; border-radius:var(--jp-radius-sm); transition:var(--jp-ease); }
+        .sidebar-link:hover { background:rgba(143,192,219,.2); color:var(--jp-primary-dark); }
+        .sidebar-link.active { background:var(--jp-primary-lightest); color:var(--jp-primary-dark); font-weight:600; border-right:3px solid var(--jp-primary-medium); }
+        .sidebar-link i { font-size:1.1rem; width:1.4rem; text-align:center; }
+        .dash-wrapper { flex:1; display:flex; }
+        .dash-main { flex:1; padding:2rem 1.75rem; max-width:900px; }
+        .jp-card { background:rgba(255,255,255,.9); border-radius:var(--jp-radius-lg); border:1px solid rgba(0,0,0,.08); padding:1.5rem 1.75rem; box-shadow:var(--jp-shadow-sm); margin-bottom:1.25rem; }
+        .card-title { font-size:.72rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#adb5bd; margin-bottom:1rem; }
+        .info-row { display:flex; align-items:center; gap:.6rem; padding:.5rem 0; border-bottom:1px solid #f1f3f5; font-size:.9rem; }
+        .info-row:last-child { border-bottom:none; }
+        .info-row i { color:var(--jp-primary-medium); width:1.25rem; text-align:center; flex-shrink:0; }
+        .info-label { color:#6c757d; min-width:8rem; }
+        .info-value { font-weight:500; }
+        /* Status badges */
+        .status-badge { display:inline-flex; align-items:center; gap:.3rem; border-radius:50rem; padding:.3rem .85rem; font-size:.8rem; font-weight:600; }
+        .status-draft,.status-cancelled { background:#e9ecef; color:#495057; }
+        .status-submitted,.status-in_progress { background:#cfe2ff; color:#084298; }
+        .status-under_review { background:#cff4fc; color:#055160; }
+        .status-waiting_customer_payment { background:#fff3cd; color:#664d03; }
+        .status-completed { background:#d1e7dd; color:#0a3622; }
+        .status-rejected { background:#f8d7da; color:#58151c; }
+        /* Order header */
+        .order-header { background:var(--jp-gradient); border-radius:var(--jp-radius-lg); padding:1.4rem 1.75rem; color:#fff; margin-bottom:1.25rem; box-shadow:var(--jp-shadow-sm); }
+        /* Messages */
+        .msg-thread { display:flex; flex-direction:column; gap:.85rem; max-height:520px; overflow-y:auto; padding-right:.25rem; }
+        .msg-bubble { display:flex; flex-direction:column; max-width:80%; }
+        .msg-bubble.customer { align-self:flex-end; align-items:flex-end; }
+        .msg-bubble.staff { align-self:flex-start; align-items:flex-start; }
+        .msg-body { padding:.65rem 1rem; border-radius:.9rem; font-size:.9rem; line-height:1.6; }
+        .msg-bubble.customer .msg-body { background:var(--jp-primary-lightest); color:var(--jp-primary-dark); border-bottom-left-radius:.2rem; }
+        .msg-bubble.staff .msg-body { background:#f1f3f5; color:#212529; border-bottom-right-radius:.2rem; }
+        .msg-meta { font-size:.75rem; color:#adb5bd; margin-top:.25rem; }
+        .msg-att-link { display:inline-flex; align-items:center; gap:.3rem; font-size:.8rem; color:var(--jp-primary-medium); text-decoration:none; padding:.2rem .5rem; background:rgba(61,149,190,.1); border-radius:.3rem; margin-top:.35rem; }
+        .msg-att-link:hover { background:rgba(61,149,190,.2); }
+        /* Attachments list */
+        .att-item { display:flex; align-items:center; gap:.7rem; padding:.6rem .75rem; border-radius:var(--jp-radius-sm); border:1px solid #e9ecef; background:#fff; margin-bottom:.5rem; }
+        .att-item-name { font-size:.88rem; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .att-item-date { font-size:.78rem; color:#adb5bd; white-space:nowrap; }
+        /* Message form */
+        .form-label { font-weight:600; font-size:.88rem; }
+        .form-control { border-radius:var(--jp-radius-sm); font-size:.9rem; }
+        .form-control:focus { border-color:var(--jp-primary-light); box-shadow:0 0 0 .2rem rgba(61,149,190,.2); }
+        /* Footer */
+        .footer { background:var(--jp-dark); color:rgba(255,255,255,.6); padding:1.5rem 0; font-size:.875rem; text-align:center; margin-top:auto; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="/"><i class="bi bi-globe2 ms-1"></i>جت‌پی‌۲۴</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+                <li class="nav-item">
+                    <span class="nav-link text-muted fw-semibold" style="font-size:.95rem;">
+                        <i class="bi bi-person-circle me-1"></i>{{ user.get_full_name }}
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left ms-1"></i>خروج</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="dash-wrapper">
+    <aside class="sidebar d-none d-md-flex flex-column">
+        <div class="sidebar-heading">منو</div>
+        <a href="{% url 'dashboard' %}" class="sidebar-link"><i class="bi bi-grid-1x2"></i>داشبورد</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-person"></i>پروفایل</a>
+        <a href="{% url 'kyc_submit' %}" class="sidebar-link"><i class="bi bi-shield-check"></i>احراز هویت (KYC)</a>
+        <a href="{% url 'order_list' %}" class="sidebar-link active"><i class="bi bi-receipt"></i>سفارش‌های من</a>
+    </aside>
+
+    <main class="dash-main">
+
+        <!-- Order header -->
+        <div class="order-header d-flex flex-wrap align-items-start justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <h5 class="fw-bold mb-0" dir="ltr">{{ order.order_number }}</h5>
+                    <span class="status-badge status-{{ order.status }}">{{ order.status_label }}</span>
+                </div>
+                <p class="mb-0 mt-1 opacity-75" style="font-size:.85rem;">
+                    {{ order.category.title }} &mdash; {{ order.subcategory.title }}
+                </p>
+            </div>
+            <a href="{% url 'order_list' %}" class="btn btn-light btn-sm fw-semibold" style="border-radius:.5rem;">
+                <i class="bi bi-arrow-right ms-1"></i>بازگشت
+            </a>
+        </div>
+
+        <!-- Order details -->
+        <div class="jp-card">
+            <div class="card-title">جزئیات سفارش</div>
+            <div class="info-row">
+                <i class="bi bi-hash"></i>
+                <span class="info-label">شماره سفارش</span>
+                <span class="info-value" dir="ltr">{{ order.order_number }}</span>
+            </div>
+            <div class="info-row">
+                <i class="bi bi-folder2"></i>
+                <span class="info-label">دسته‌بندی</span>
+                <span class="info-value">{{ order.category.title }}</span>
+            </div>
+            <div class="info-row">
+                <i class="bi bi-tag"></i>
+                <span class="info-label">زیر دسته‌بندی</span>
+                <span class="info-value">{{ order.subcategory.title }}</span>
+            </div>
+            {% if order.organization_name %}
+            <div class="info-row">
+                <i class="bi bi-building"></i>
+                <span class="info-label">سازمان / دانشگاه</span>
+                <span class="info-value">{{ order.organization_name }}</span>
+            </div>
+            {% endif %}
+            {% if order.amount %}
+            <div class="info-row">
+                <i class="bi bi-currency-dollar"></i>
+                <span class="info-label">مبلغ</span>
+                <span class="info-value" dir="ltr">{{ order.amount }} {% if order.currency %}{{ order.currency }}{% endif %}</span>
+            </div>
+            {% endif %}
+            {% if order.deadline %}
+            <div class="info-row">
+                <i class="bi bi-calendar-event"></i>
+                <span class="info-label">ددلاین</span>
+                <span class="info-value" dir="ltr">{{ order.deadline|date:"Y/m/d" }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <i class="bi bi-clock"></i>
+                <span class="info-label">تاریخ ثبت</span>
+                <span class="info-value" dir="ltr">{{ order.created_at|date:"Y/m/d — H:i" }}</span>
+            </div>
+            {% if order.assigned_admin %}
+            <div class="info-row">
+                <i class="bi bi-person-badge"></i>
+                <span class="info-label">مسئول سفارش</span>
+                <span class="info-value">{{ order.assigned_admin.get_full_name|default:order.assigned_admin.email }}</span>
+            </div>
+            {% endif %}
+            <div class="mt-3 pt-2" style="border-top:1px solid #f1f3f5;">
+                <p class="mb-1" style="font-size:.82rem;font-weight:700;color:#6c757d;">توضیحات</p>
+                <p class="mb-0" style="font-size:.92rem;line-height:1.7;white-space:pre-wrap;">{{ order.description }}</p>
+            </div>
+            {% if order.customer_note %}
+            <div class="mt-3 pt-2" style="border-top:1px solid #f1f3f5;">
+                <p class="mb-1" style="font-size:.82rem;font-weight:700;color:#6c757d;">
+                    <i class="bi bi-pencil ms-1"></i>یادداشت من
+                </p>
+                <p class="mb-0" style="font-size:.92rem;line-height:1.7;white-space:pre-wrap;">{{ order.customer_note }}</p>
+            </div>
+            {% endif %}
+            {% if order.admin_note %}
+            <div class="mt-3 p-3" style="background:#fff3cd;border-radius:var(--jp-radius-sm);border:1px solid #ffc107;">
+                <p class="mb-1" style="font-size:.82rem;font-weight:700;color:#664d03;">
+                    <i class="bi bi-info-circle ms-1"></i>یادداشت تیم جت‌پی‌۲۴
+                </p>
+                <p class="mb-0" style="font-size:.9rem;color:#664d03;white-space:pre-wrap;">{{ order.admin_note }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Attachments -->
+        <div class="jp-card">
+            <div class="card-title">پیوست‌ها</div>
+
+            {% if attachments %}
+                {% for att in attachments %}
+                <div class="att-item">
+                    <i class="bi bi-paperclip text-muted"></i>
+                    <span class="att-item-name">{{ att.title|default:att.filename }}</span>
+                    <span class="att-item-date">{{ att.created_at|date:"Y/m/d" }}</span>
+                    <a href="{% url 'order_attachment_download' att.pk %}"
+                       class="btn btn-sm btn-outline-primary" style="border-radius:.4rem;font-size:.78rem;">
+                        <i class="bi bi-download ms-1"></i>دانلود
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted mb-3" style="font-size:.88rem;">هنوز پیوستی بارگذاری نشده است.</p>
+            {% endif %}
+
+            <hr class="my-3">
+            <p class="mb-2 fw-semibold" style="font-size:.88rem;">افزودن پیوست جدید</p>
+            <form method="post" action="{% url 'order_upload_attachment' order.pk %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label">فایل</label>
+                        {{ attach_form.file }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">عنوان (اختیاری)</label>
+                        {{ attach_form.title }}
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-outline-primary w-100" style="border-radius:.5rem;">
+                            <i class="bi bi-upload ms-1"></i>بارگذاری
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Messages -->
+        <div class="jp-card">
+            <div class="card-title">پیام‌ها</div>
+
+            {% if order_msgs %}
+                <div class="msg-thread mb-4" id="msg-thread">
+                    {% for msg in order_msgs %}
+                    <div class="msg-bubble {% if msg.is_from_staff %}staff{% else %}customer{% endif %}">
+                        <div class="msg-body">{{ msg.message }}</div>
+                        {% for att in msg.attachments.all %}
+                            <a href="{% url 'message_attachment_download' att.pk %}" class="msg-att-link">
+                                <i class="bi bi-paperclip"></i>{{ att.filename }}
+                            </a>
+                        {% endfor %}
+                        <div class="msg-meta">
+                            {% if msg.is_from_staff %}<strong style="color:var(--jp-primary-medium);">تیم جت‌پی‌۲۴</strong> &mdash; {% endif %}
+                            {{ msg.created_at|date:"Y/m/d — H:i" }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted mb-4" style="font-size:.88rem;">هنوز پیامی وجود ندارد. سوال یا توضیح اضافه‌ای دارید؟ بنویسید.</p>
+            {% endif %}
+
+            <!-- Send message form -->
+            <form method="post" action="{% url 'order_send_message' order.pk %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-2">
+                    {{ msg_form.message }}
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <label for="msg-file-input" class="btn btn-outline-secondary btn-sm" style="border-radius:.4rem;cursor:pointer;">
+                        <i class="bi bi-paperclip ms-1"></i>پیوست
+                    </label>
+                    <input type="file" id="msg-file-input" name="message_files"
+                           multiple accept="image/*,.pdf,.doc,.docx"
+                           class="d-none"
+                           onchange="showFileNames(this)">
+                    <span id="msg-file-names" class="text-muted" style="font-size:.82rem;"></span>
+                    <button type="submit" class="btn btn-primary btn-sm ms-auto" style="background:var(--jp-gradient);border:none;border-radius:.5rem;">
+                        <i class="bi bi-send ms-1"></i>ارسال پیام
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+</div>
+
+<footer class="footer">
+    <div class="container"><p class="mb-0">© ۱۴۰۵ جت‌پی‌۲۴. تمامی حقوق محفوظ است.</p></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Show chosen file names next to the paperclip button
+    function showFileNames(input) {
+        var names = Array.from(input.files).map(function (f) { return f.name; });
+        document.getElementById('msg-file-names').textContent =
+            names.length ? names.join('، ') : '';
+    }
+
+    // Scroll message thread to bottom on load
+    var thread = document.getElementById('msg-thread');
+    if (thread) { thread.scrollTop = thread.scrollHeight; }
+</script>
+</body>
+</html>

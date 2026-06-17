@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثبت سفارش — جت‌پی‌۲۴</title>
+    <title>ثبت سفارش جدید — جت‌پی‌۲۴</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,201 +11,306 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         :root {
-            --jp-primary: #0d6efd;
-            --jp-dark: #0a1628;
-            --jp-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+            --jp-primary-dark:    #1F2A60;
+            --jp-primary-medium: #3C5A8C;
+            --jp-primary-light:  #3D95BE;
+            --jp-primary-lighter:#67B0D4;
+            --jp-primary-lightest:#8FC0DB;
+            --jp-dark:           #0A1628;
+            --jp-gradient:       linear-gradient(135deg, var(--jp-primary-dark) 0%, var(--jp-primary-lighter) 100%);
+            --jp-radius-lg:      1.25rem;
+            --jp-radius-sm:      0.6rem;
+            --jp-shadow-sm:      0 4px 12px rgba(0,0,0,.08);
+            --jp-ease:           all 0.2s ease-in-out;
         }
-
-        body {
-            font-family: 'Vazirmatn', system-ui, sans-serif;
-            background: #f0f4f8;
-            min-height: 100vh;
-        }
-
-        .page-header {
-            background: var(--jp-gradient);
-            color: #fff;
-            padding: 2.5rem 0;
-        }
-
-        .form-card {
-            background: #fff;
-            border-radius: 1.25rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            padding: 2.5rem;
-            margin-top: -2rem;
-            margin-bottom: 3rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .required-star {
-            color: #dc3545;
-        }
-
-        .form-section-title {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--jp-primary);
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .file-hint {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-
-        .upload-box {
-            border: 2px dashed #dee2e6;
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            background: #f8f9fa;
-            transition: border-color 0.2s ease;
-        }
-
-        .upload-box:hover {
-            border-color: var(--jp-primary);
-        }
+        body { font-family:'Vazirmatn',system-ui,sans-serif; background:#f8f9fa; min-height:100vh; display:flex; flex-direction:column; }
+        .navbar { backdrop-filter:blur(8px); background:rgba(255,255,255,.8)!important; border-bottom:1px solid rgba(0,0,0,.08); }
+        .navbar-brand { font-weight:800; color:var(--jp-primary-dark)!important; }
+        .navbar .nav-link { color:#495057; }
+        .sidebar { background:rgba(255,255,255,.9); border-left:1px solid rgba(0,0,0,.08); min-height:calc(100vh - 57px); width:240px; flex-shrink:0; padding:1.75rem 0; }
+        .sidebar-heading { font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#adb5bd; padding:0 1.25rem; margin-bottom:.5rem; }
+        .sidebar-link { display:flex; align-items:center; gap:.65rem; padding:.6rem 1.25rem; color:#495057; text-decoration:none; font-size:.9rem; font-weight:500; border-radius:var(--jp-radius-sm); transition:var(--jp-ease); }
+        .sidebar-link:hover { background:rgba(143,192,219,.2); color:var(--jp-primary-dark); }
+        .sidebar-link.active { background:var(--jp-primary-lightest); color:var(--jp-primary-dark); font-weight:600; border-right:3px solid var(--jp-primary-medium); }
+        .sidebar-link i { font-size:1.1rem; width:1.4rem; text-align:center; }
+        .dash-wrapper { flex:1; display:flex; }
+        .dash-main { flex:1; padding:2rem 1.75rem; max-width:800px; }
+        .jp-card { background:rgba(255,255,255,.9); border-radius:var(--jp-radius-lg); border:1px solid rgba(0,0,0,.08); padding:1.75rem; box-shadow:var(--jp-shadow-sm); }
+        .page-header { background:var(--jp-gradient); border-radius:var(--jp-radius-lg); padding:1.4rem 1.75rem; color:#fff; margin-bottom:1.5rem; box-shadow:var(--jp-shadow-sm); }
+        .form-label { font-weight:600; font-size:.9rem; color:#344055; margin-bottom:.35rem; }
+        .form-label .text-danger { font-weight:700; }
+        .form-section { font-size:.72rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#adb5bd; margin:1.5rem 0 .75rem; }
+        .form-control, .form-select { border-radius:var(--jp-radius-sm); border:1px solid #dee2e6; font-size:.9rem; }
+        .form-control:focus, .form-select:focus { border-color:var(--jp-primary-light); box-shadow:0 0 0 .2rem rgba(61,149,190,.2); }
+        .kyc-block { background:#fff3cd; border:1px solid #ffc107; border-radius:var(--jp-radius-lg); padding:2rem; text-align:center; }
+        /* Attachment row */
+        .attachment-row { display:flex; gap:.5rem; align-items:flex-start; margin-bottom:.5rem; }
+        .attachment-row .form-control { flex:1; }
+        .btn-remove-att { flex-shrink:0; }
+        /* Footer */
+        .footer { background:var(--jp-dark); color:rgba(255,255,255,.6); padding:1.5rem 0; font-size:.875rem; text-align:center; margin-top:auto; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-light bg-white border-bottom">
-        <div class="container">
-            <a class="navbar-brand text-primary" href="/">
-                <i class="bi bi-globe2 ms-1"></i>جت‌پی‌۲۴
-            </a>
-            <div class="d-flex gap-2">
-                <a href="{% url 'order_tracking' %}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-search ms-1"></i>پیگیری سفارش
-                </a>
-                <a href="/" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-arrow-right ms-1"></i>بازگشت به صفحه اصلی
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="page-header">
-        <div class="container text-center">
-            <h1 class="fw-bold mb-2">ثبت سفارش پرداخت</h1>
-            <p class="mb-0 opacity-75">فرم زیر را تکمیل کنید تا کارشناسان ما در اسرع وقت با شما تماس بگیرند.</p>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="/"><i class="bi bi-globe2 ms-1"></i>جت‌پی‌۲۴</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+                <li class="nav-item">
+                    <span class="nav-link text-muted fw-semibold" style="font-size:.95rem;">
+                        <i class="bi bi-person-circle me-1"></i>{{ user.get_full_name }}
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left ms-1"></i>خروج</a>
+                </li>
+            </ul>
         </div>
     </div>
+</nav>
 
-    <div class="container">
-        <div class="form-card">
-            {% if form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-                {% for error in form.non_field_errors %}
-                {{ error }}
-                {% endfor %}
-            </div>
+<div class="dash-wrapper">
+    <aside class="sidebar d-none d-md-flex flex-column">
+        <div class="sidebar-heading">منو</div>
+        <a href="{% url 'dashboard' %}" class="sidebar-link"><i class="bi bi-grid-1x2"></i>داشبورد</a>
+        <a href="#" class="sidebar-link"><i class="bi bi-person"></i>پروفایل</a>
+        <a href="{% url 'kyc_submit' %}" class="sidebar-link"><i class="bi bi-shield-check"></i>احراز هویت (KYC)</a>
+        <a href="{% url 'order_list' %}" class="sidebar-link active"><i class="bi bi-receipt"></i>سفارش‌های من</a>
+    </aside>
+
+    <main class="dash-main">
+
+        <div class="page-header">
+            <h5 class="fw-bold mb-1"><i class="bi bi-plus-circle me-2"></i>ثبت سفارش جدید</h5>
+            <p class="mb-0 opacity-75" style="font-size:.9rem;">
+                اطلاعات درخواست خود را وارد کنید. تیم جت‌پی‌۲۴ در کوتاه‌ترین زمان پاسخ می‌دهد.
+            </p>
+        </div>
+
+        {% if kyc_blocked %}
+        <!-- KYC block screen -->
+        <div class="kyc-block">
+            <i class="bi bi-shield-exclamation" style="font-size:3rem;color:#ffc107;"></i>
+            <h5 class="fw-bold mt-3 mb-2">احراز هویت تأیید نشده است</h5>
+            <p class="text-muted mb-3" style="max-width:400px;margin:0 auto;">
+                برای ثبت سفارش، ابتدا باید مدارک هویتی شما توسط تیم جت‌پی‌۲۴ بررسی و تأیید شود.
+            </p>
+            {% if kyc_profile %}
+                {% if kyc_profile.status == 'pending' %}
+                    <div class="alert alert-info d-inline-flex align-items-center gap-2 mb-3" style="font-size:.9rem;">
+                        <i class="bi bi-hourglass-split"></i>
+                        مدارک شما ارسال شده و در انتظار بررسی است.
+                    </div><br>
+                {% elif kyc_profile.status == 'rejected' %}
+                    <div class="alert alert-danger d-inline-flex align-items-center gap-2 mb-3" style="font-size:.9rem;">
+                        <i class="bi bi-x-circle"></i>
+                        درخواست احراز هویت شما رد شده. لطفاً مدارک را ویرایش و مجدداً ارسال کنید.
+                    </div><br>
+                {% endif %}
             {% endif %}
+            <a href="{% url 'kyc_submit' %}" class="btn btn-warning fw-semibold" style="border-radius:.6rem;">
+                <i class="bi bi-shield-plus ms-1"></i>رفتن به صفحه احراز هویت
+            </a>
+            <a href="{% url 'order_list' %}" class="btn btn-outline-secondary ms-2 fw-semibold" style="border-radius:.6rem;">
+                <i class="bi bi-arrow-right ms-1"></i>بازگشت به سفارش‌ها
+            </a>
+        </div>
 
-            <form method="post" enctype="multipart/form-data" novalidate>
-                {% csrf_token %}
+        {% else %}
+        <!-- Order create form -->
+        <form method="post" enctype="multipart/form-data" id="order-form">
+            {% csrf_token %}
 
-                <p class="form-section-title">
-                    <i class="bi bi-person-fill ms-1"></i>اطلاعات تماس
-                </p>
-                <div class="row g-4 mb-4">
-                    <div class="col-md-12">
-                        <label for="{{ form.name.id_for_label }}" class="form-label">
-                            {{ form.name.label }} <span class="required-star">*</span>
-                        </label>
-                        {{ form.name }}
-                        {% if form.name.errors %}
-                        <div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="{{ form.phone.id_for_label }}" class="form-label">
-                            {{ form.phone.label }} <span class="required-star">*</span>
-                        </label>
-                        {{ form.phone }}
-                        {% if form.phone.errors %}
-                        <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">
-                            {{ form.email.label }} <span class="required-star">*</span>
-                        </label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                        <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
-                        {% endif %}
-                    </div>
+            <div class="jp-card mb-4">
+                <div class="form-section">انتخاب سرویس</div>
+
+                <div class="mb-3">
+                    <label for="{{ form.category.id_for_label }}" class="form-label">
+                        دسته‌بندی <span class="text-danger">*</span>
+                    </label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="text-danger mt-1" style="font-size:.83rem;">{{ form.category.errors.0 }}</div>
+                    {% endif %}
                 </div>
 
-                <p class="form-section-title">
-                    <i class="bi bi-credit-card-fill ms-1"></i>جزئیات سفارش
-                </p>
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <label for="{{ form.service_type.id_for_label }}" class="form-label">
-                            {{ form.service_type.label }} <span class="required-star">*</span>
-                        </label>
-                        {{ form.service_type }}
-                        {% if form.service_type.errors %}
-                        <div class="invalid-feedback d-block">{{ form.service_type.errors.0 }}</div>
-                        {% endif %}
-                    </div>
+                <div class="mb-3">
+                    <label for="{{ form.subcategory.id_for_label }}" class="form-label">
+                        زیر دسته‌بندی <span class="text-danger">*</span>
+                    </label>
+                    {{ form.subcategory }}
+                    {% if form.subcategory.errors %}
+                        <div class="text-danger mt-1" style="font-size:.83rem;">{{ form.subcategory.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="jp-card mb-4">
+                <div class="form-section">جزئیات سفارش</div>
+
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        توضیحات <span class="text-danger">*</span>
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger mt-1" style="font-size:.83rem;">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-text">جزئیات کامل درخواست خود را شرح دهید.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.organization_name.id_for_label }}" class="form-label">
+                        نام سازمان / دانشگاه
+                        <span class="text-muted fw-normal" style="font-size:.8rem;">(اختیاری)</span>
+                    </label>
+                    {{ form.organization_name }}
+                </div>
+
+                <div class="row g-3">
                     <div class="col-md-6">
                         <label for="{{ form.amount.id_for_label }}" class="form-label">
-                            {{ form.amount.label }} <span class="required-star">*</span>
+                            مبلغ <span class="text-muted fw-normal" style="font-size:.8rem;">(اختیاری)</span>
                         </label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            {{ form.amount }}
-                        </div>
-                        {% if form.amount.errors %}
-                        <div class="invalid-feedback d-block">{{ form.amount.errors.0 }}</div>
-                        {% endif %}
+                        {{ form.amount }}
                     </div>
-                    <div class="col-12">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">
-                            {{ form.description.label }}
-                            <span class="text-muted small fw-normal">(اختیاری)</span>
+                    <div class="col-md-6">
+                        <label for="{{ form.currency.id_for_label }}" class="form-label">
+                            ارز <span class="text-muted fw-normal" style="font-size:.8rem;">(اختیاری)</span>
                         </label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                        <div class="invalid-feedback d-block">{{ form.description.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-12">
-                        <label for="{{ form.document.id_for_label }}" class="form-label">
-                            {{ form.document.label }}
-                            <span class="text-muted small fw-normal">(اختیاری)</span>
-                        </label>
-                        <div class="upload-box">
-                            {{ form.document }}
-                            <p class="file-hint mt-2 mb-0">
-                                <i class="bi bi-info-circle ms-1"></i>
-                                فرمت‌های مجاز: PDF، JPG، JPEG، PNG — حداکثر حجم: ۱۰ مگابایت
-                            </p>
-                        </div>
-                        {% if form.document.errors %}
-                        <div class="invalid-feedback d-block">{{ form.document.errors.0 }}</div>
-                        {% endif %}
+                        {{ form.currency }}
                     </div>
                 </div>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="bi bi-send-fill ms-1"></i>ثبت و ارسال سفارش
-                    </button>
+                <div class="mt-3">
+                    <label for="{{ form.deadline.id_for_label }}" class="form-label">
+                        ددلاین <span class="text-muted fw-normal" style="font-size:.8rem;">(اختیاری)</span>
+                    </label>
+                    {{ form.deadline }}
                 </div>
-            </form>
-        </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+                <div class="mt-3">
+                    <label for="{{ form.customer_note.id_for_label }}" class="form-label">
+                        یادداشت مشتری
+                        <span class="text-muted fw-normal" style="font-size:.8rem;">(اختیاری)</span>
+                    </label>
+                    {{ form.customer_note }}
+                    <div class="form-text">نکته یا توضیح اضافی که می‌خواهید تیم جت‌پی‌۲۴ بداند.</div>
+                </div>
+            </div>
+
+            <div class="jp-card mb-4">
+                <div class="form-section">پیوست‌ها <span class="text-muted fw-normal" style="font-size:.8rem;text-transform:none;">(اختیاری)</span></div>
+
+                <div id="attachment-rows">
+                    <!-- JS populates rows here -->
+                </div>
+
+                <button type="button" id="btn-add-att" class="btn btn-outline-secondary btn-sm" style="border-radius:.5rem;">
+                    <i class="bi bi-paperclip ms-1"></i>افزودن فایل پیوست
+                </button>
+                <div class="form-text mt-2">
+                    فرمت‌های مجاز: تصویر، PDF، Word، Excel، ZIP. حداکثر ۱۰ مگابایت.
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 pb-4">
+                <button type="submit" class="btn btn-primary fw-semibold px-4" style="background:var(--jp-gradient);border:none;border-radius:.6rem;">
+                    <i class="bi bi-send ms-1"></i>ثبت سفارش
+                </button>
+                <a href="{% url 'order_list' %}" class="btn btn-outline-secondary" style="border-radius:.6rem;">
+                    انصراف
+                </a>
+            </div>
+
+        </form>
+        {% endif %}
+
+    </main>
+</div>
+
+<footer class="footer">
+    <div class="container"><p class="mb-0">© ۱۴۰۵ جت‌پی‌۲۴. تمامی حقوق محفوظ است.</p></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% if not kyc_blocked %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Category → SubCategory AJAX ──────────────────────────────────────
+    var catSel = document.getElementById('{{ form.category.id_for_label }}');
+    var subSel = document.getElementById('{{ form.subcategory.id_for_label }}');
+
+    function loadSubcategories(catId, selectedId) {
+        subSel.innerHTML = '<option value="">در حال بارگذاری…</option>';
+        subSel.disabled = true;
+
+        fetch('/dashboard/orders/ajax/subcategories/?category_id=' + catId)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                subSel.innerHTML = '<option value="">— انتخاب زیر دسته‌بندی —</option>';
+                data.subcategories.forEach(function (s) {
+                    var opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.title;
+                    if (selectedId && String(s.id) === String(selectedId)) {
+                        opt.selected = true;
+                    }
+                    subSel.appendChild(opt);
+                });
+                subSel.disabled = false;
+            })
+            .catch(function () {
+                subSel.innerHTML = '<option value="">خطا در بارگذاری</option>';
+                subSel.disabled = false;
+            });
+    }
+
+    catSel.addEventListener('change', function () {
+        if (this.value) {
+            loadSubcategories(this.value, null);
+        } else {
+            subSel.innerHTML = '<option value="">— ابتدا دسته‌بندی را انتخاب کنید —</option>';
+            subSel.disabled = false;
+        }
+    });
+
+    // On page load (POST error re-render): restore subcategories for selected category
+    if (catSel.value) {
+        var currentSub = '{{ form.subcategory.value|default:"" }}';
+        loadSubcategories(catSel.value, currentSub);
+    }
+
+    // ── Dynamic file attachment rows ──────────────────────────────────────
+    var rowsContainer = document.getElementById('attachment-rows');
+    var addBtn        = document.getElementById('btn-add-att');
+    var rowCount      = 0;
+
+    function addAttachmentRow() {
+        rowCount++;
+        var row = document.createElement('div');
+        row.className = 'attachment-row';
+        row.id = 'att-row-' + rowCount;
+        row.innerHTML =
+            '<input type="file" name="attachment_files" class="form-control" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip">' +
+            '<input type="text" name="attachment_titles" class="form-control" placeholder="عنوان فایل (اختیاری)" style="max-width:200px;">' +
+            '<button type="button" class="btn btn-outline-danger btn-sm btn-remove-att" style="border-radius:.4rem;" onclick="removeRow(\'att-row-' + rowCount + '\')">' +
+            '<i class="bi bi-x-lg"></i></button>';
+        rowsContainer.appendChild(row);
+    }
+
+    window.removeRow = function (id) {
+        var el = document.getElementById(id);
+        if (el) el.remove();
+    };
+
+    addBtn.addEventListener('click', addAttachmentRow);
+});
+</script>
+{% endif %}
 </body>
 </html>

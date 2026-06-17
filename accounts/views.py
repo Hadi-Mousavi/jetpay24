@@ -1,8 +1,9 @@
 from django.conf import settings
-from django.contrib.auth import login
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from kyc.models import KYCProfile
 from .forms import LoginForm, RegistrationForm
 from .models import User
 
@@ -49,4 +50,16 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect(settings.LOGIN_REDIRECT_URL)
+    return redirect('/')
+
+
+@login_required
+def dashboard(request):
+    try:
+        kyc_profile = request.user.kyc_profile
+    except KYCProfile.DoesNotExist:
+        kyc_profile = None
+
+    return render(request, 'accounts/dashboard.html', {
+        'kyc_profile': kyc_profile,
+    })
