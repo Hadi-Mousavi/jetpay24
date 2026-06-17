@@ -156,7 +156,15 @@
                     <li class="nav-item"><a class="nav-link" href="#services">خدمات</a></li>
                     <li class="nav-item"><a class="nav-link" href="#why">چرا ما</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'order_tracking' %}">پیگیری سفارش</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-primary text-white px-3 me-lg-2" href="#contact">تماس با ما</a></li>
+
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">خروج</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">ورود</a></li>
+                        <li class="nav-item"><a class="btn btn-primary text-white px-3 me-lg-2" href="{% url 'register' %}">ثبت‌نام</a></li>
+                    {% endif %}
+
+                    <li class="nav-item"><a class="btn btn-primary text-white px-3 me-lg-2" href="#contact">تماس با ما</a></li>
                 </ul>
             </div>
         </div>

@@ -28,6 +28,7 @@ admin.site.index_title = 'مدیریت سایت'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('pages.urls')),
+    path('', include('accounts.urls')),
     path('order/', include('orders.urls')),
     path('tracking/', order_tracking, name='order_tracking'),
 ]
