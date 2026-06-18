@@ -13,6 +13,7 @@ from .models import (
     Order, OrderAttachment, OrderMessage,
     OrderMessageAttachment, SubCategory,
 )
+from .timeline_display import prepare_timeline_for_display
 from .unread import mark_order_admin_messages_read, orders_with_unread_counts
 from .utils import validate_upload
 
@@ -138,12 +139,12 @@ def _render_order_detail(request, order, msg_form=None, attach_form=None):
     if not request.user.is_staff:
         mark_order_admin_messages_read(order)
     attachments = order.attachments.select_related('uploaded_by')
-    timeline    = _build_order_timeline(order)
+    timeline         = prepare_timeline_for_display(_build_order_timeline(order))
     return render(request, 'orders/order_detail.html', {
         'order':        order,
         'order_msgs':   order_msgs,
         'attachments':  attachments,
-        'timeline':     timeline,
+        'timeline_groups': timeline,
         'msg_form':     msg_form if msg_form is not None else MessageForm(),
         'attach_form':  attach_form if attach_form is not None else AttachmentForm(),
     })

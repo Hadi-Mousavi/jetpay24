@@ -1,0 +1,39 @@
+{% load static %}
+{% if user.is_authenticated and not user.is_staff %}
+<link rel="stylesheet" href="{% static 'css/notification-bell.css' %}">
+<li
+    class="nav-item dropdown notification-bell-item notification-bell-wrap"
+    data-dropdown-url="{% url 'notifications_dropdown' %}"
+    data-mark-all-url="{% url 'notifications_mark_all_read' %}"
+    data-dashboard-url="{% url 'dashboard' %}#notifications"
+>
+    <button
+        type="button"
+        class="notification-bell-btn dropdown-toggle"
+        id="notificationBellDropdown"
+        data-bs-toggle="dropdown"
+        data-bs-auto-close="outside"
+        aria-expanded="false"
+        aria-label="اعلان‌ها"
+    >
+        <i class="bi bi-bell"></i>
+        {% if unread_notification_count %}
+        <span class="notification-bell-badge">{{ unread_notification_count }}</span>
+        {% endif %}
+    </button>
+    <div
+        class="dropdown-menu dropdown-menu-end notification-dropdown"
+        aria-labelledby="notificationBellDropdown"
+    >
+        <div class="notification-dropdown-header">اعلان‌ها</div>
+        <div class="notification-dropdown-list">
+            <div class="notification-dropdown-loading">در حال بارگذاری...</div>
+        </div>
+        <div class="notification-dropdown-footer">
+            <a href="{% url 'dashboard' %}#notifications">مشاهده همه اعلان‌ها</a>
+            <button type="button" class="notification-mark-all-btn">خواندن همه</button>
+        </div>
+    </div>
+</li>
+<script src="{% static 'js/notification-bell.js' %}" defer></script>
+{% endif %}

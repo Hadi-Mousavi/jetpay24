@@ -380,6 +380,63 @@
             color: #495057;
         }
 
+        .notification-item.notification-unread {
+            border-color: rgba(61, 149, 190, 0.35);
+            background: rgba(143, 192, 219, 0.12);
+        }
+
+        .notification-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--jp-primary-dark);
+            margin: 0 0 0.2rem;
+        }
+
+        .notification-body {
+            font-size: 0.84rem;
+            color: #495057;
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        .notification-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.55rem;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: #adb5bd;
+        }
+
+        .notification-mark-read {
+            font-size: 0.75rem;
+            padding: 0.15rem 0.55rem;
+            border-radius: 50rem;
+        }
+
+        .notifications-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .notifications-card-header .info-card-title {
+            margin-bottom: 0;
+        }
+
+        .notification-unread-badge {
+            font-weight: 700;
+            color: var(--jp-primary-medium);
+        }
+
         .notification-content {
             flex: 1;
             min-width: 0;
@@ -587,6 +644,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarDash">
                 <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+                    {% include 'includes/notification_bell.html' %}
                     <li class="nav-item">
                         <span class="nav-link text-muted d-flex align-items-center gap-2 fw-semibold" style="font-size: 0.95rem;">
                             <i class="bi bi-person-circle" style="font-size: 1.4rem; position: relative; top: 3px;"></i>
@@ -932,21 +990,46 @@
             </div>
 
             <!-- Notifications -->
-            <div class="info-card notifications-card">
-                <div class="info-card-title">اعلان‌ها</div>
+            <div class="info-card notifications-card" id="notifications">
+                <div class="notifications-card-header">
+                    <div class="info-card-title">
+                        اعلان‌ها{% if unread_notification_count %} <span class="notification-unread-badge">({{ unread_notification_count }})</span>{% endif %}
+                    </div>
+                    {% if unread_notification_count %}
+                    <form method="post" action="{% url 'notifications_mark_all_read' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-primary notification-mark-read">
+                            <i class="bi bi-check2-all ms-1"></i>خواندن همه
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
 
                 {% if notifications %}
                     <ul class="notifications-list">
                         {% for notification in notifications %}
-                        <li class="notification-item notification-{{ notification.type }}">
+                        <li class="notification-item notification-{{ notification.display_type }}{% if not notification.is_read %} notification-unread{% endif %}">
                             <span class="notification-icon-wrap">
-                                <i class="bi {{ notification.icon }}"></i>
+                                <i class="bi {{ notification.display_icon }}"></i>
                             </span>
                             <div class="notification-content">
-                                <p class="notification-message">
-                                    <span class="notification-emoji">{{ notification.emoji }}</span>
-                                    {{ notification.message }}
+                                <p class="notification-title">
+                                    <span class="notification-emoji">{{ notification.display_emoji }}</span>
+                                    {{ notification.title }}
                                 </p>
+                                <p class="notification-body">{{ notification.message }}</p>
+                                <div class="notification-meta">
+                                    <span class="notification-time" dir="ltr">{{ notification.created_at|date:"Y/m/d — H:i" }}</span>
+                                    {% if not notification.is_read %}
+                                    <form method="post" action="{% url 'notification_mark_read' notification.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary notification-mark-read">
+                                            علامت‌گذاری خوانده‌شده
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </div>
                         </li>
                         {% endfor %}

@@ -71,27 +71,73 @@
         .att-item-name { font-size:.88rem; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .att-item-date { font-size:.78rem; color:#adb5bd; white-space:nowrap; }
         /* Order timeline */
-        .order-timeline { position:relative; padding-right:.25rem; }
+        .order-timeline { position:relative; padding:0.25rem 0.25rem 0 0; }
         .order-timeline::before {
-            content:''; position:absolute; right:.82rem; top:.35rem; bottom:.35rem;
-            width:2px; background:linear-gradient(180deg,var(--jp-primary-lightest) 0%,rgba(143,192,219,.35) 100%);
-            border-radius:2px;
+            content:''; position:absolute; right:1.05rem; top:0.75rem; bottom:0.75rem;
+            width:2px;
+            background:linear-gradient(180deg, rgba(61,149,190,.45) 0%, rgba(143,192,219,.25) 55%, rgba(233,236,239,.8) 100%);
+            border-radius:999px;
         }
-        .timeline-event { position:relative; display:flex; gap:.85rem; padding:0 2rem 1.35rem 0; }
-        .timeline-event:last-child { padding-bottom:0; }
+        .timeline-group { position:relative; margin-bottom:0.85rem; }
+        .timeline-group:last-child { margin-bottom:0; }
+        .timeline-group-stack { display:flex; flex-direction:column; gap:0.5rem; padding-right:2.65rem; }
+        .timeline-event-card {
+            position:relative; background:#fff; border:1px solid rgba(0,0,0,.06);
+            border-radius:var(--jp-radius-sm); padding:0.72rem 0.85rem 0.68rem;
+            box-shadow:0 3px 14px rgba(31,42,96,.06); transition:var(--jp-ease);
+        }
+        .timeline-event-card:hover {
+            transform:translateY(-1px);
+            box-shadow:0 8px 22px rgba(31,42,96,.1);
+        }
+        .timeline-event-head { display:flex; align-items:center; gap:0.75rem; }
+        .timeline-event-card.event-primary { --event-accent:#3D95BE; --event-accent-bg:rgba(61,149,190,.12); --event-accent-ring:rgba(61,149,190,.22); }
+        .timeline-event-card.event-gray { --event-accent:#6c757d; --event-accent-bg:rgba(108,117,125,.12); --event-accent-ring:rgba(108,117,125,.22); }
+        .timeline-event-card.event-purple { --event-accent:#7c3aed; --event-accent-bg:rgba(124,58,237,.12); --event-accent-ring:rgba(124,58,237,.22); }
+        .timeline-event-card.event-indigo { --event-accent:#4f46e5; --event-accent-bg:rgba(79,70,229,.12); --event-accent-ring:rgba(79,70,229,.22); }
+        .timeline-event-card.event-orange { --event-accent:#f97316; --event-accent-bg:rgba(249,115,22,.12); --event-accent-ring:rgba(249,115,22,.22); }
+        .timeline-event-card.event-yellow { --event-accent:#ca8a04; --event-accent-bg:rgba(202,138,4,.14); --event-accent-ring:rgba(202,138,4,.24); }
+        .timeline-event-card.event-green { --event-accent:#16a34a; --event-accent-bg:rgba(22,163,74,.12); --event-accent-ring:rgba(22,163,74,.22); }
+        .timeline-event-card.event-red { --event-accent:#dc2626; --event-accent-bg:rgba(220,38,38,.12); --event-accent-ring:rgba(220,38,38,.22); }
         .timeline-marker {
-            position:absolute; right:0; top:.1rem; width:1.65rem; height:1.65rem;
-            border-radius:50%; background:#fff; border:2px solid var(--jp-primary-lightest);
-            box-shadow:0 2px 8px rgba(31,42,96,.08); display:flex; align-items:center;
-            justify-content:center; flex-shrink:0; z-index:1;
+            width:2rem; height:2rem; border-radius:0.65rem; display:inline-flex;
+            align-items:center; justify-content:center; flex-shrink:0;
+            background:var(--event-accent-bg); color:var(--event-accent); font-size:0.88rem;
+            box-shadow:inset 0 0 0 1px var(--event-accent-ring);
         }
-        .timeline-marker i { font-size:.78rem; color:var(--jp-primary-medium); }
-        .timeline-content { flex:1; min-width:0; padding-top:.05rem; }
-        .timeline-title { font-size:.92rem; font-weight:600; color:#212529; margin-bottom:.15rem; line-height:1.5; }
-        .timeline-time { font-size:.78rem; color:#adb5bd; }
+        .timeline-event-card::before {
+            content:''; position:absolute; right:-1.85rem; top:50%;
+            transform:translateY(-50%);
+            width:0.55rem; height:0.55rem; border-radius:50%;
+            background:var(--event-accent); border:2px solid #fff;
+            box-shadow:0 0 0 3px var(--event-accent-ring);
+        }
+        .timeline-title-wrap { flex:1; min-width:0; }
+        .timeline-title {
+            font-size:0.9375rem; font-weight:600; color:#374151;
+            line-height:1.45; margin:0;
+        }
+        .timeline-event-time {
+            margin-top:0.15rem;
+            font-size:0.8125rem; color:#9CA3AF; font-weight:400; line-height:1.35;
+        }
+        .timeline-latest-badge {
+            display:inline-flex; align-items:center; gap:0.25rem;
+            font-size:0.68rem; font-weight:700; color:#fff;
+            background:linear-gradient(135deg, var(--jp-primary-dark), var(--jp-primary-light));
+            border-radius:50rem; padding:0.18rem 0.55rem; margin-bottom:0.4rem;
+            box-shadow:0 2px 8px rgba(31,42,96,.18);
+        }
+        .timeline-event-card:has(.timeline-latest-badge)::before {
+            top:calc(50% + 0.7rem);
+        }
         @media (max-width:575.98px) {
-            .timeline-event { padding-right:1.85rem; gap:.65rem; }
-            .timeline-title { font-size:.88rem; }
+            .order-timeline::before { right:0.82rem; }
+            .timeline-group-stack { padding-right:2.15rem; }
+            .timeline-event-card { padding:0.65rem 0.75rem 0.62rem; }
+            .timeline-event-card::before { right:-1.55rem; }
+            .timeline-title { font-size:0.875rem; }
+            .timeline-event-time { font-size:0.75rem; }
         }
         /* Message form */
         .form-label { font-weight:600; font-size:.88rem; }
@@ -109,6 +155,7 @@
         <a class="navbar-brand" href="/"><i class="bi bi-globe2 ms-1"></i>جت‌پی‌۲۴</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+                {% include 'includes/notification_bell.html' %}
                 <li class="nav-item">
                     <span class="nav-link text-muted fw-semibold" style="font-size:.95rem;">
                         <i class="bi bi-person-circle me-1"></i>{{ user.get_full_name }}
@@ -233,19 +280,33 @@
         </div>
 
         <!-- Order timeline -->
+        {% load order_filters %}
         <div class="jp-card">
             <div class="card-title">تاریخچه سفارش</div>
 
-            {% if timeline %}
+            {% if timeline_groups %}
                 <div class="order-timeline">
-                    {% for event in timeline %}
-                    <div class="timeline-event">
-                        <div class="timeline-marker" aria-hidden="true">
-                            <i class="bi {{ event.icon }}"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">{{ event.emoji }} {{ event.title }}</div>
-                            <div class="timeline-time" dir="ltr">{{ event.timestamp|date:"Y/m/d — H:i" }}</div>
+                    {% for group in timeline_groups %}
+                    <div class="timeline-group">
+                        <div class="timeline-group-stack">
+                            {% for event in group.events %}
+                            <div class="timeline-event-card event-{{ event.color }}">
+                                {% if group.is_latest and forloop.first %}
+                                <span class="timeline-latest-badge">
+                                    <i class="bi bi-stars"></i>آخرین بروزرسانی
+                                </span>
+                                {% endif %}
+                                <div class="timeline-event-head">
+                                    <div class="timeline-marker" aria-hidden="true">
+                                        <i class="bi {{ event.icon }}"></i>
+                                    </div>
+                                    <div class="timeline-title-wrap">
+                                        <p class="timeline-title">{{ event.title }}</p>
+                                        <div class="timeline-event-time">{{ event.timestamp|to_jalali_datetime }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                     {% endfor %}

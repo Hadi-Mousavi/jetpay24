@@ -1203,9 +1203,54 @@ class OrderTimelineTests(TestCase):
         self.assertIn('پیام جدید ثبت شد', titles)
 
 
-# ===========================================================================
-# Unread admin messages
-# ===========================================================================
+class OrderTimelineDisplayTests(TestCase):
+    """Timeline presentation layer (display only)."""
+
+    def setUp(self):
+        self.cat, self.sub = _make_category()
+        self.user = _make_user('timeline-display@test.com', kyc_approved=True)
+
+    def test_display_titles_are_improved(self):
+        from .timeline_display import prepare_timeline_for_display
+        from .views import _build_order_timeline
+
+        order = _make_order(self.user, self.cat, self.sub)
+        order.assigned_admin = _make_user('admin@test.com', is_staff=True)
+        order.save()
+        OrderMessage.objects.create(
+            order=order, sender=self.user, message='سلام',
+        )
+        OrderAttachment.objects.create(
+            order=order,
+            file=ContentFile(b'%PDF', name='doc.pdf'),
+            uploaded_by=self.user,
+        )
+        groups = prepare_timeline_for_display(_build_order_timeline(order))
+        titles = [e['title'] for g in groups for e in g['events']]
+        self.assertIn('پیام جدید از تیم جت‌پی‌۲۴', titles)
+        self.assertIn('کارشناس سفارش تعیین شد', titles)
+        self.assertIn('مدرک جدید به سفارش اضافه شد', titles)
+
+    def test_groups_events_with_same_timestamp(self):
+        from .timeline_display import prepare_timeline_for_display
+        from .views import _build_order_timeline
+
+        order = _make_order(self.user, self.cat, self.sub)
+        order.status = Order.STATUS_IN_PROGRESS
+        order.assigned_admin = _make_user('admin2@test.com', is_staff=True)
+        order.save()
+        groups = prepare_timeline_for_display(_build_order_timeline(order))
+        multi_event_groups = [g for g in groups if len(g['events']) > 1]
+        self.assertTrue(multi_event_groups)
+
+    def test_order_detail_shows_jalali_and_latest_badge(self):
+        order = _make_order(self.user, self.cat, self.sub)
+        client = Client()
+        client.force_login(self.user)
+        resp = client.get(reverse('order_detail', args=[order.pk]))
+        self.assertContains(resp, 'آخرین بروزرسانی')
+        content = resp.content.decode()
+        self.assertNotIn('2026/', content.split('تاریخچه سفارش')[1][:800])
 
 class OrderUnreadMessageTests(TestCase):
     """Read/unread state for staff vs customer order messages."""
@@ -1256,13 +1301,13 @@ class OrderUnreadMessageTests(TestCase):
         resp = self.client.get(reverse('order_list'))
         self.assertContains(resp, '💬 2 پیام جدید')
 
-    def test_dashboard_shows_unread_notification(self):
+    def test_dashboard_shows_admin_message_notification(self):
         OrderMessage.objects.create(
             order=self.order, sender=self.staff, message='سلام',
         )
         resp = self.client.get(reverse('dashboard'))
-        self.assertContains(resp, '📨')
-        self.assertContains(resp, '1 پیام خوانده‌نشده دارید')
+        self.assertContains(resp, 'پیام جدید از تیم')
+        self.assertContains(resp, '💬')
 
     def test_sidebar_shows_unread_count(self):
         OrderMessage.objects.create(

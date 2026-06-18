@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'orders',
     'pages',
     'kyc',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -71,6 +72,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'orders.context_processors.unread_messages',
+                'notifications.context_processors.unread_notifications',
             ],
         },
     },
