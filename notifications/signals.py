@@ -99,6 +99,19 @@ def _notify_kyc_status(sender, instance, created, **kwargs):
         create_notification(
             user=instance.user,
             title='احراز هویت رد شد',
-            message='احراز هویت شما نیاز به اصلاح دارد. لطفاً مجدداً ارسال کنید.',
+            message='احراز هویت شما رد شد. لطفاً مدارک را بررسی و مجدداً ارسال کنید.',
             notification_type=Notification.TYPE_KYC_REJECTED,
+        )
+    elif instance.status == KYCProfile.STATUS_NEEDS_CORRECTION:
+        note = instance.admin_note.strip() if instance.admin_note else ''
+        message = (
+            f'مدارک احراز هویت شما نیاز به اصلاح دارد. {note}'
+            if note
+            else 'مدارک احراز هویت شما نیاز به اصلاح دارد. لطفاً مدارک را بررسی و ارسال کنید.'
+        )
+        create_notification(
+            user=instance.user,
+            title='مدارک نیاز به اصلاح دارند',
+            message=message,
+            notification_type=Notification.TYPE_KYC_NEEDS_CORRECTION,
         )

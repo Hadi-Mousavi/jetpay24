@@ -2,6 +2,7 @@ import jdatetime
 from django import forms
 
 from .models import KYCProfile
+from .utils import validate_kyc_image
 
 _FA_TO_EN = str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')
 _EN_TO_FA = str.maketrans('0123456789', '۰۱۲۳۴۵۶۷۸۹')
@@ -86,7 +87,7 @@ class KYCSubmitForm(forms.ModelForm):
         required=False,
         widget=forms.ClearableFileInput(attrs={
             'class': 'form-control',
-            'accept': 'image/*',
+            'accept': 'image/jpeg,image/png',
         }),
     )
 
@@ -95,13 +96,61 @@ class KYCSubmitForm(forms.ModelForm):
         required=False,
         widget=forms.ClearableFileInput(attrs={
             'class': 'form-control',
-            'accept': 'image/*',
+            'accept': 'image/jpeg,image/png',
+        }),
+    )
+
+    # ── Banking information ────────────────────────────────────────────────
+
+    card_holder_name = forms.CharField(
+        label='نام صاحب کارت',
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'نام و نام خانوادگی روی کارت',
+        }),
+    )
+
+    bank_name = forms.CharField(
+        label='نام بانک',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'مثال: ملت، ملی، صادرات',
+        }),
+    )
+
+    card_last4 = forms.CharField(
+        label='چهار رقم آخر کارت',
+        max_length=4,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '۴ رقم آخر',
+            'dir': 'ltr',
+            'maxlength': '4',
+            'inputmode': 'numeric',
+        }),
+    )
+
+    bank_card_image = forms.ImageField(
+        label='تصویر کارت بانکی',
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/jpeg,image/png',
         }),
     )
 
     class Meta:
         model = KYCProfile
-        fields = ['national_id', 'date_of_birth', 'national_id_image', 'selfie_image']
+        fields = [
+            'national_id', 'date_of_birth',
+            'national_id_image', 'selfie_image',
+            'card_holder_name', 'bank_name', 'card_last4', 'bank_card_image',
+        ]
 
     def clean_national_id(self):
         value = self.cleaned_data.get('national_id', '').strip()
@@ -109,3 +158,27 @@ class KYCSubmitForm(forms.ModelForm):
         if not value.isdigit() or len(value) != 10:
             raise forms.ValidationError('کد ملی باید دقیقا ۱۰ رقم باشد.')
         return value
+
+    def clean_card_last4(self):
+        value = self.cleaned_data.get('card_last4', '').strip()
+        if not value:
+            return value
+        value = _normalize_digits(value)
+        if not value.isdigit() or len(value) != 4:
+            raise forms.ValidationError('چهار رقم آخر کارت باید دقیقاً ۴ رقم باشد.')
+        return value
+
+    def clean_national_id_image(self):
+        f = self.cleaned_data.get('national_id_image')
+        validate_kyc_image(f)
+        return f
+
+    def clean_selfie_image(self):
+        f = self.cleaned_data.get('selfie_image')
+        validate_kyc_image(f)
+        return f
+
+    def clean_bank_card_image(self):
+        f = self.cleaned_data.get('bank_card_image')
+        validate_kyc_image(f)
+        return f

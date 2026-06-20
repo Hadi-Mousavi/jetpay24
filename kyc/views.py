@@ -18,7 +18,7 @@ def kyc_submit(request):
             'احراز هویت شما در حال بررسی یا تأیید شده است و امکان ویرایش وجود ندارد.'
         )
 
-    # ── Read-only view for locked profiles ──────────────────────────────────
+    # ── Read-only view for locked profiles (pending / approved) ─────────────
     if profile.is_locked:
         return render(request, 'kyc/kyc_submit.html', {
             'kyc_profile': profile,
@@ -26,7 +26,7 @@ def kyc_submit(request):
             'is_locked': True,
         })
 
-    # ── Editable form for not_submitted / rejected profiles ─────────────────
+    # ── Editable form for not_submitted / rejected / needs_correction ───────
     if request.method == 'POST':
         form = KYCSubmitForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
@@ -41,9 +41,19 @@ def kyc_submit(request):
     else:
         form = KYCSubmitForm(instance=profile)
 
+    # Show admin_note when status is rejected or needs_correction
+    show_admin_note = (
+        profile.admin_note
+        and profile.status in (
+            KYCProfile.STATUS_REJECTED,
+            KYCProfile.STATUS_NEEDS_CORRECTION,
+        )
+    )
+
     return render(request, 'kyc/kyc_submit.html', {
         'form': form,
         'kyc_profile': profile,
         'kyc_settings': kyc_settings,
         'is_locked': False,
+        'show_admin_note': show_admin_note,
     })

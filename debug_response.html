@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سفارش {{ order.order_number }} — جت‌پی‌۲۴</title>
+    <title>سفارش JP24-2026-000001 — جت‌پی‌۲۴</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -190,14 +190,53 @@
         <a class="navbar-brand" href="/"><i class="bi bi-globe2 ms-1"></i>جت‌پی‌۲۴</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
-                {% include 'includes/notification_bell.html' %}
+                
+
+<link rel="stylesheet" href="/static/css/notification-bell.css">
+<li
+    class="nav-item dropdown notification-bell-item notification-bell-wrap"
+    data-dropdown-url="/dashboard/notifications/dropdown/"
+    data-mark-all-url="/dashboard/notifications/mark-all-read/"
+    data-dashboard-url="/dashboard/#notifications"
+>
+    <button
+        type="button"
+        class="notification-bell-btn dropdown-toggle"
+        id="notificationBellDropdown"
+        data-bs-toggle="dropdown"
+        data-bs-auto-close="outside"
+        aria-expanded="false"
+        aria-label="اعلان‌ها"
+    >
+        <i class="bi bi-bell"></i>
+        
+        <span class="notification-bell-badge">2</span>
+        
+    </button>
+    <div
+        class="dropdown-menu dropdown-menu-end notification-dropdown"
+        aria-labelledby="notificationBellDropdown"
+    >
+        <div class="notification-dropdown-header">اعلان‌ها</div>
+        <div class="notification-dropdown-list">
+            <div class="notification-dropdown-loading">در حال بارگذاری...</div>
+        </div>
+        <div class="notification-dropdown-footer">
+            <a href="/dashboard/#notifications">مشاهده همه اعلان‌ها</a>
+            <button type="button" class="notification-mark-all-btn">خواندن همه</button>
+        </div>
+    </div>
+</li>
+<script src="/static/js/notification-bell.js" defer></script>
+
+
                 <li class="nav-item">
                     <span class="nav-link text-muted fw-semibold" style="font-size:.95rem;">
-                        <i class="bi bi-person-circle me-1"></i>{{ user.get_full_name }}
+                        <i class="bi bi-person-circle me-1"></i>تست کاربر
                     </span>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left ms-1"></i>خروج</a>
+                    <a class="nav-link" href="/auth/logout/"><i class="bi bi-box-arrow-left ms-1"></i>خروج</a>
                 </li>
             </ul>
         </div>
@@ -207,10 +246,10 @@
 <div class="dash-wrapper">
     <aside class="sidebar d-none d-md-flex flex-column">
         <div class="sidebar-heading">منو</div>
-        <a href="{% url 'dashboard' %}" class="sidebar-link"><i class="bi bi-grid-1x2"></i>داشبورد</a>
+        <a href="/dashboard/" class="sidebar-link"><i class="bi bi-grid-1x2"></i>داشبورد</a>
         <a href="#" class="sidebar-link"><i class="bi bi-person"></i>پروفایل</a>
-        <a href="{% url 'kyc_submit' %}" class="sidebar-link"><i class="bi bi-shield-check"></i>احراز هویت (KYC)</a>
-        <a href="{% url 'order_list' %}" class="sidebar-link active"><i class="bi bi-receipt"></i>سفارش‌های من{% if unread_message_count %} <span class="sidebar-unread-count">({{ unread_message_count }})</span>{% endif %}</a>
+        <a href="/dashboard/kyc/" class="sidebar-link"><i class="bi bi-shield-check"></i>احراز هویت (KYC)</a>
+        <a href="/dashboard/orders/" class="sidebar-link active"><i class="bi bi-receipt"></i>سفارش‌های من</a>
     </aside>
 
     <main class="dash-main">
@@ -219,27 +258,19 @@
         <div class="order-header d-flex flex-wrap align-items-start justify-content-between gap-3">
             <div>
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <h5 class="fw-bold mb-0" dir="ltr">{{ order.order_number }}</h5>
-                    <span class="status-badge status-{{ order.status }}">{{ order.status_label }}</span>
+                    <h5 class="fw-bold mb-0" dir="ltr">JP24-2026-000001</h5>
+                    <span class="status-badge status-waiting_customer_payment">در انتظار پرداخت</span>
                 </div>
                 <p class="mb-0 mt-1 opacity-75" style="font-size:.85rem;">
-                    {{ order.category.title }} &mdash; {{ order.subcategory.title }}
+                    تست &mdash; زیر تست
                 </p>
             </div>
-            <a href="{% url 'order_list' %}" class="btn btn-light btn-sm fw-semibold" style="border-radius:.5rem;">
+            <a href="/dashboard/orders/" class="btn btn-light btn-sm fw-semibold" style="border-radius:.5rem;">
                 <i class="bi bi-arrow-right ms-1"></i>بازگشت
             </a>
         </div>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'success' in message.tags %}success{% else %}info{% endif %} alert-dismissible fade show mb-4" role="alert">
-                    <i class="bi bi-{% if 'error' in message.tags %}exclamation-triangle-fill{% elif 'success' in message.tags %}check-circle-fill{% else %}info-circle-fill{% endif %} me-2"></i>
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+        
 
         <!-- Order details -->
         <div class="jp-card">
@@ -247,254 +278,113 @@
             <div class="info-row">
                 <i class="bi bi-hash"></i>
                 <span class="info-label">شماره سفارش</span>
-                <span class="info-value" dir="ltr">{{ order.order_number }}</span>
+                <span class="info-value" dir="ltr">JP24-2026-000001</span>
             </div>
             <div class="info-row">
                 <i class="bi bi-folder2"></i>
                 <span class="info-label">دسته‌بندی</span>
-                <span class="info-value">{{ order.category.title }}</span>
+                <span class="info-value">تست</span>
             </div>
             <div class="info-row">
                 <i class="bi bi-tag"></i>
                 <span class="info-label">زیر دسته‌بندی</span>
-                <span class="info-value">{{ order.subcategory.title }}</span>
+                <span class="info-value">زیر تست</span>
             </div>
-            {% if order.organization_name %}
-            <div class="info-row">
-                <i class="bi bi-building"></i>
-                <span class="info-label">سازمان / دانشگاه</span>
-                <span class="info-value">{{ order.organization_name }}</span>
-            </div>
-            {% endif %}
-            {% if order.amount %}
+            
+            
             <div class="info-row">
                 <i class="bi bi-currency-dollar"></i>
                 <span class="info-label">مبلغ</span>
-                <span class="info-value" dir="ltr">{{ order.amount }} {% if order.currency %}{{ order.currency }}{% endif %}</span>
+                <span class="info-value" dir="ltr">100.00 USD</span>
             </div>
-            {% endif %}
-            {% if order.deadline %}
-            <div class="info-row">
-                <i class="bi bi-calendar-event"></i>
-                <span class="info-label">ددلاین</span>
-                <span class="info-value" dir="ltr">{{ order.deadline|date:"Y/m/d" }}</span>
-            </div>
-            {% endif %}
+            
+            
             <div class="info-row">
                 <i class="bi bi-clock"></i>
                 <span class="info-label">تاریخ ثبت</span>
-                <span class="info-value" dir="ltr">{{ order.created_at|date:"Y/m/d — H:i" }}</span>
+                <span class="info-value" dir="ltr">2026/06/20 — 16:04</span>
             </div>
-            {% if order.assigned_admin %}
-            <div class="info-row">
-                <i class="bi bi-person-badge"></i>
-                <span class="info-label">مسئول سفارش</span>
-                <span class="info-value">{{ order.assigned_admin.get_full_name|default:order.assigned_admin.email }}</span>
-            </div>
-            {% endif %}
+            
             <div class="mt-3 pt-2" style="border-top:1px solid #f1f3f5;">
                 <p class="mb-1" style="font-size:.82rem;font-weight:700;color:#6c757d;">توضیحات</p>
-                <p class="mb-0" style="font-size:.92rem;line-height:1.7;white-space:pre-wrap;">{{ order.description }}</p>
+                <p class="mb-0" style="font-size:.92rem;line-height:1.7;white-space:pre-wrap;">تست پرداخت</p>
             </div>
-            {% if order.customer_note %}
-            <div class="mt-3 pt-2" style="border-top:1px solid #f1f3f5;">
-                <p class="mb-1" style="font-size:.82rem;font-weight:700;color:#6c757d;">
-                    <i class="bi bi-pencil ms-1"></i>یادداشت من
-                </p>
-                <p class="mb-0" style="font-size:.92rem;line-height:1.7;white-space:pre-wrap;">{{ order.customer_note }}</p>
-            </div>
-            {% endif %}
-            {% if order.admin_note %}
-            <div class="mt-3 p-3" style="background:#fff3cd;border-radius:var(--jp-radius-sm);border:1px solid #ffc107;">
-                <p class="mb-1" style="font-size:.82rem;font-weight:700;color:#664d03;">
-                    <i class="bi bi-info-circle ms-1"></i>یادداشت تیم جت‌پی‌۲۴
-                </p>
-                <p class="mb-0" style="font-size:.9rem;color:#664d03;white-space:pre-wrap;">{{ order.admin_note }}</p>
-            </div>
-            {% endif %}
+            
+            
         </div>
 
         <!-- ── Payment section ────────────────────────────────────── -->
-        {% if order.status == 'waiting_customer_payment' or payments %}
-        <div class="jp-card">
-            <div class="card-title">پرداخت</div>
-
-            {# ── Waiting for payment ──────────────────────────────── #}
-            {% if order.status == 'waiting_customer_payment' %}
-
-                {% if has_pending_payment %}
-                    {# A submitted receipt is currently under review #}
-                    <div class="payment-banner submitted">
-                        <h6><i class="bi bi-hourglass-split me-2"></i>رسید پرداخت شما در حال بررسی است</h6>
-                        <p>تیم جت‌پی‌۲۴ رسید شما را بررسی می‌کند. به محض تأیید، سفارش وارد مرحله انجام خواهد شد.</p>
-                    </div>
-
-                {% elif latest_payment and latest_payment.is_rejected %}
-                    {# Previous receipt was rejected; prompt resubmission #}
-                    <div class="payment-banner rejected mb-3">
-                        <h6><i class="bi bi-x-circle-fill me-2"></i>رسید پرداخت رد شد</h6>
-                        <p>لطفاً رسید معتبر بارگذاری کنید و مجدداً ارسال نمایید.</p>
-                        {% if latest_payment.rejection_note %}
-                            <div class="mt-2 p-2" style="background:rgba(0,0,0,.05);border-radius:.4rem;font-size:.84rem;">
-                                <strong>دلیل رد:</strong> {{ latest_payment.rejection_note }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    <!-- Upload receipt form -->
-                    <div class="payment-banner awaiting mb-3">
-                        <h6><i class="bi bi-credit-card me-2"></i>بارگذاری رسید پرداخت</h6>
-                        {% if order.amount %}
-                            <p class="mb-1">مبلغ قابل پرداخت: <strong dir="ltr">{{ order.amount }} {% if order.currency %}{{ order.currency }}{% endif %}</strong></p>
-                        {% endif %}
-                        <p class="mb-0" style="font-size:.82rem;">لطفاً پس از پرداخت، تصویر یا PDF رسید بانکی خود را بارگذاری کنید.</p>
-                    </div>
-                    <form method="post" action="{% url 'payment_submit' order.pk %}" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-7">
-                                <label class="form-label">{{ payment_form.receipt_file.label }} <span class="text-danger">*</span></label>
-                                {{ payment_form.receipt_file }}
-                                <div class="form-text">{{ payment_form.receipt_file.help_text }}</div>
-                            </div>
-                            <div class="col-md-5">
-                                <label class="form-label">{{ payment_form.reference_number.label }}</label>
-                                {{ payment_form.reference_number }}
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-sm fw-semibold" style="background:var(--jp-gradient);color:#fff;border:none;border-radius:.5rem;padding:.45rem 1.25rem;">
-                            <i class="bi bi-upload me-1"></i>ارسال رسید
-                        </button>
-                    </form>
-
-                {% else %}
-                    {# No payment yet submitted — first-time upload form #}
-                    <div class="payment-banner awaiting mb-3">
-                        <h6><i class="bi bi-credit-card me-2"></i>پرداخت سفارش</h6>
-                        {% if order.amount %}
-                            <p class="mb-1">مبلغ قابل پرداخت: <strong dir="ltr">{{ order.amount }} {% if order.currency %}{{ order.currency }}{% endif %}</strong></p>
-                        {% endif %}
-                        <p class="mb-0" style="font-size:.82rem;">لطفاً پس از پرداخت، تصویر یا PDF رسید بانکی خود را بارگذاری کنید.</p>
-                    </div>
-                    <form method="post" action="{% url 'payment_submit' order.pk %}" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-7">
-                                <label class="form-label">{{ payment_form.receipt_file.label }} <span class="text-danger">*</span></label>
-                                {{ payment_form.receipt_file }}
-                                <div class="form-text">{{ payment_form.receipt_file.help_text }}</div>
-                            </div>
-                            <div class="col-md-5">
-                                <label class="form-label">{{ payment_form.reference_number.label }}</label>
-                                {{ payment_form.reference_number }}
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-sm fw-semibold" style="background:var(--jp-gradient);color:#fff;border:none;border-radius:.5rem;padding:.45rem 1.25rem;">
-                            <i class="bi bi-upload me-1"></i>ارسال رسید
-                        </button>
-                    </form>
-                {% endif %}
-
-            {% endif %}{# end waiting_payment block #}
-
-            {# ── Payment history ─────────────────────────────────── #}
-            {% if payments %}
-                <div class="{% if order.status == 'waiting_customer_payment' %}mt-4{% endif %}">
-                    <p style="font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#adb5bd;margin-bottom:.6rem;">سابقه پرداخت</p>
-                    {% for p in payments %}
-                    <div class="payment-history-row">
-                        <i class="bi bi-receipt text-muted"></i>
-                        <span class="payment-status-pill pstatus-{{ p.status }}">{{ p.get_status_display }}</span>
-                        {% if p.reference_number %}
-                            <span class="text-muted" dir="ltr" style="font-size:.82rem;">{{ p.reference_number }}</span>
-                        {% endif %}
-                        <span class="text-muted" style="font-size:.78rem;margin-right:auto;">{{ p.submitted_at|date:"Y/m/d H:i" }}</span>
-                        <a href="{% url 'payment_receipt_download' p.pk %}"
-                           class="btn btn-sm btn-outline-secondary" style="border-radius:.35rem;font-size:.76rem;padding:.18rem .55rem;">
-                            <i class="bi bi-download ms-1"></i>رسید
-                        </a>
-                    </div>
-                    {% if p.is_rejected and p.rejection_note %}
-                        <div class="mb-2 me-2 ps-2" style="border-right:3px solid #f8d7da;font-size:.82rem;color:#842029;">
-                            <i class="bi bi-exclamation-circle ms-1"></i>{{ p.rejection_note }}
-                        </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-        </div>
-        {% endif %}
+        
         <!-- ── End payment section ──────────────────────────────── -->
 
         <!-- Order timeline -->
-        {% load order_filters %}
+        
         <div class="jp-card">
             <div class="card-title">تاریخچه سفارش</div>
 
-            {% if timeline_groups %}
+            
                 <div class="order-timeline">
-                    {% for group in timeline_groups %}
+                    
                     <div class="timeline-group">
                         <div class="timeline-group-stack">
-                            {% for event in group.events %}
-                            <div class="timeline-event-card event-{{ event.color }}">
-                                {% if group.is_latest and forloop.first %}
+                            
+                            <div class="timeline-event-card event-red">
+                                
                                 <span class="timeline-latest-badge">
                                     <i class="bi bi-stars"></i>آخرین بروزرسانی
                                 </span>
-                                {% endif %}
+                                
                                 <div class="timeline-event-head">
                                     <div class="timeline-marker" aria-hidden="true">
-                                        <i class="bi {{ event.icon }}"></i>
+                                        <i class="bi bi-credit-card"></i>
                                     </div>
                                     <div class="timeline-title-wrap">
-                                        <p class="timeline-title">{{ event.title }}</p>
-                                        <div class="timeline-event-time">{{ event.timestamp|to_jalali_datetime }}</div>
+                                        <p class="timeline-title">سفارش در انتظار پرداخت قرار گرفت</p>
+                                        <div class="timeline-event-time">۳۰ خرداد ۱۴۰۵ - ۱۶:۰۴</div>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}
+                            
+                            <div class="timeline-event-card event-primary">
+                                
+                                <div class="timeline-event-head">
+                                    <div class="timeline-marker" aria-hidden="true">
+                                        <i class="bi bi-box-seam-fill"></i>
+                                    </div>
+                                    <div class="timeline-title-wrap">
+                                        <p class="timeline-title">سفارش ثبت شد</p>
+                                        <div class="timeline-event-time">۳۰ خرداد ۱۴۰۵ - ۱۶:۰۴</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
-                    {% endfor %}
+                    
                 </div>
-            {% else %}
-                <p class="text-muted mb-0" style="font-size:.88rem;">هنوز رویدادی ثبت نشده است.</p>
-            {% endif %}
+            
         </div>
 
         <!-- Attachments -->
         <div class="jp-card">
             <div class="card-title">پیوست‌ها</div>
 
-            {% if attachments %}
-                {% for att in attachments %}
-                <div class="att-item">
-                    <i class="bi bi-paperclip text-muted"></i>
-                    <span class="att-item-name">{{ att.title|default:att.filename }}</span>
-                    <span class="att-item-date">{{ att.created_at|date:"Y/m/d" }}</span>
-                    <a href="{% url 'order_attachment_download' att.pk %}"
-                       class="btn btn-sm btn-outline-primary" style="border-radius:.4rem;font-size:.78rem;">
-                        <i class="bi bi-download ms-1"></i>دانلود
-                    </a>
-                </div>
-                {% endfor %}
-            {% else %}
+            
                 <p class="text-muted mb-3" style="font-size:.88rem;">هنوز پیوستی بارگذاری نشده است.</p>
-            {% endif %}
+            
 
             <hr class="my-3">
             <p class="mb-2 fw-semibold" style="font-size:.88rem;">افزودن پیوست جدید</p>
-            <form method="post" action="{% url 'order_upload_attachment' order.pk %}" enctype="multipart/form-data">
-                {% csrf_token %}
+            <form method="post" action="/dashboard/orders/1/attach/" enctype="multipart/form-data">
+                <input type="hidden" name="csrfmiddlewaretoken" value="EK5n3tJMcL1Y01jhXHGMRY1dX7yN99QRPRwh8EeqsSBFciEnpbiT0k178lkHk28C">
                 <div class="row g-2 align-items-end">
                     <div class="col-md-5">
                         <label class="form-label">فایل</label>
-                        {{ attach_form.file }}
+                        <input type="file" name="file" class="form-control" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" required id="id_file">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">عنوان (اختیاری)</label>
-                        {{ attach_form.title }}
+                        <input type="text" name="title" class="form-control" placeholder="عنوان فایل (اختیاری)" maxlength="200" id="id_title">
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-outline-primary w-100" style="border-radius:.5rem;">
@@ -509,35 +399,16 @@
         <div class="jp-card">
             <div class="card-title">پیام‌ها</div>
 
-            {% if order_msgs %}
-                <div class="msg-thread mb-4" id="msg-thread">
-                    {% for msg in order_msgs %}
-                    <div class="msg-bubble {% if msg.is_from_staff %}staff{% if not msg.is_read %} msg-unread{% endif %}{% else %}customer{% endif %}">
-                        {% if msg.is_from_staff and not msg.is_read %}
-                        <span class="msg-new-badge"><i class="bi bi-envelope-fill"></i>جدید</span>
-                        {% endif %}
-                        <div class="msg-body">{{ msg.message }}</div>
-                        {% for att in msg.attachments.all %}
-                            <a href="{% url 'message_attachment_download' att.pk %}" class="msg-att-link">
-                                <i class="bi bi-paperclip"></i>{{ att.filename }}
-                            </a>
-                        {% endfor %}
-                        <div class="msg-meta">
-                            {% if msg.is_from_staff %}<strong style="color:var(--jp-primary-medium);">تیم جت‌پی‌۲۴</strong> &mdash; {% endif %}
-                            {{ msg.created_at|date:"Y/m/d — H:i" }}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
+            
                 <p class="text-muted mb-4" style="font-size:.88rem;">هنوز پیامی وجود ندارد. سوال یا توضیح اضافه‌ای دارید؟ بنویسید.</p>
-            {% endif %}
+            
 
             <!-- Send message form -->
-            <form method="post" action="{% url 'order_send_message' order.pk %}" enctype="multipart/form-data">
-                {% csrf_token %}
+            <form method="post" action="/dashboard/orders/1/message/" enctype="multipart/form-data">
+                <input type="hidden" name="csrfmiddlewaretoken" value="EK5n3tJMcL1Y01jhXHGMRY1dX7yN99QRPRwh8EeqsSBFciEnpbiT0k178lkHk28C">
                 <div class="mb-2">
-                    {{ msg_form.message }}
+                    <textarea name="message" cols="40" rows="3" class="form-control" placeholder="پیام خود را بنویسید…" required id="id_message">
+</textarea>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <label for="msg-file-input" class="btn btn-outline-secondary btn-sm" style="border-radius:.4rem;cursor:pointer;">

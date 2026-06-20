@@ -121,6 +121,33 @@ def _build_order_timeline(order):
             'sort_order': 60,
         })
 
+    # Payment events — imported lazily to avoid circular dependency
+    from payments.models import Payment as _Payment
+    for payment in order.payments.all():
+        events.append({
+            'title': 'رسید پرداخت ارسال شد',
+            'emoji': '💳',
+            'icon': 'bi-credit-card-2-front-fill',
+            'timestamp': payment.submitted_at,
+            'sort_order': 45,
+        })
+        if payment.status == _Payment.STATUS_APPROVED:
+            events.append({
+                'title': 'پرداخت تأیید شد',
+                'emoji': '💰',
+                'icon': 'bi-check-circle-fill',
+                'timestamp': payment.reviewed_at or payment.submitted_at,
+                'sort_order': 46,
+            })
+        elif payment.status == _Payment.STATUS_REJECTED:
+            events.append({
+                'title': 'پرداخت رد شد',
+                'emoji': '❌',
+                'icon': 'bi-x-circle-fill',
+                'timestamp': payment.reviewed_at or payment.submitted_at,
+                'sort_order': 47,
+            })
+
     events.sort(
         key=lambda item: (
             item['timestamp'] or timezone.now(),
@@ -133,20 +160,35 @@ def _build_order_timeline(order):
 
 def _render_order_detail(request, order, msg_form=None, attach_form=None):
     """Shared render helper — keeps queryset logic in one place."""
+    from payments.forms import PaymentSubmitForm
+    from payments.models import Payment
+
     order_msgs = list(
         order.messages.select_related('sender').prefetch_related('attachments')
     )
     if not request.user.is_staff:
         mark_order_admin_messages_read(order)
     attachments = order.attachments.select_related('uploaded_by')
-    timeline         = prepare_timeline_for_display(_build_order_timeline(order))
+    timeline    = prepare_timeline_for_display(_build_order_timeline(order))
+
+    # Payment context — only relevant for waiting_payment orders
+    payments       = list(order.payments.select_related('reviewed_by').order_by('-submitted_at'))
+    latest_payment = payments[0] if payments else None
+    has_pending_payment = any(p.status == Payment.STATUS_SUBMITTED for p in payments)
+    payment_form   = PaymentSubmitForm()
+
     return render(request, 'orders/order_detail.html', {
-        'order':        order,
-        'order_msgs':   order_msgs,
-        'attachments':  attachments,
-        'timeline_groups': timeline,
-        'msg_form':     msg_form if msg_form is not None else MessageForm(),
-        'attach_form':  attach_form if attach_form is not None else AttachmentForm(),
+        'order':              order,
+        'order_msgs':         order_msgs,
+        'attachments':        attachments,
+        'timeline_groups':    timeline,
+        'msg_form':           msg_form if msg_form is not None else MessageForm(),
+        'attach_form':        attach_form if attach_form is not None else AttachmentForm(),
+        # payment
+        'payments':           payments,
+        'latest_payment':     latest_payment,
+        'has_pending_payment': has_pending_payment,
+        'payment_form':       payment_form,
     })
 
 

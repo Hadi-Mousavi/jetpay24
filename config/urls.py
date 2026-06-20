@@ -32,6 +32,7 @@ urlpatterns = [
     path('dashboard/kyc/', include('kyc.urls')),
     path('dashboard/orders/', include('orders.urls')),
     path('dashboard/notifications/', include('notifications.urls')),
+    path('dashboard/payments/', include('payments.urls')),
     path('tracking/', order_tracking, name='order_tracking'),
 ]
 

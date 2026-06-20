@@ -136,12 +136,13 @@
             border-radius: 50rem; padding: .3rem .85rem;
             font-size: .8rem; font-weight: 600;
         }
-        .kyc-badge.not-submitted { background: #e9ecef; color: #495057; }
-        .kyc-badge.pending  { background: var(--jp-primary-lightest); color: var(--jp-primary-dark); }
-        .kyc-badge.approved { background: #d1e7dd; color: #0a3622; }
-        .kyc-badge.rejected { background: #f8d7da; color: #58151c; }
+        .kyc-badge.not-submitted     { background: #e9ecef; color: #495057; }
+        .kyc-badge.pending           { background: var(--jp-primary-lightest); color: var(--jp-primary-dark); }
+        .kyc-badge.approved          { background: #d1e7dd; color: #0a3622; }
+        .kyc-badge.rejected          { background: #f8d7da; color: #58151c; }
+        .kyc-badge.needs-correction  { background: #fff3cd; color: #664d03; }
 
-        /* ── Lock banners ────────────────────────────── */
+        /* ── Lock / status banners ───────────────────── */
         .lock-banner {
             border-radius: var(--jp-radius-lg);
             padding: 1.25rem 1.5rem;
@@ -159,8 +160,29 @@
         }
         .lock-banner.pending h5 { color: #1e3a8a; }
         .lock-banner.pending p  { color: #1d4ed8; }
+        .lock-banner.needs-correction {
+            background: linear-gradient(135deg,#fefce8,#fef08a);
+            border: 1px solid #fde047;
+        }
+        .lock-banner.needs-correction h5 { color: #713f12; }
+        .lock-banner.needs-correction p  { color: #854d0e; }
+        .lock-banner.rejected-editable {
+            background: linear-gradient(135deg,#fef2f2,#fecaca);
+            border: 1px solid #fca5a5;
+        }
+        .lock-banner.rejected-editable h5 { color: #7f1d1d; }
+        .lock-banner.rejected-editable p  { color: #991b1b; }
         .lock-banner h5 { font-weight: 700; margin-bottom: .2rem; font-size: 1rem; }
         .lock-banner p  { font-size: .875rem; margin-bottom: 0; }
+
+        /* ── Admin note box ──────────────────────────── */
+        .admin-note-box {
+            background: #fffbeb; border: 1px solid #f59e0b;
+            border-radius: var(--jp-radius-sm);
+            padding: .85rem 1rem; margin-top: 1rem;
+            font-size: .875rem; color: #78350f;
+        }
+        .admin-note-box strong { color: #92400e; }
 
         /* ── Form elements ───────────────────────────── */
         .form-label { font-weight: 600; font-size: .9rem; color: #344054; margin-bottom: .35rem; }
@@ -343,6 +365,39 @@
                                 {% endif %}
                             </div>
                         {% endif %}
+
+                        {% if kyc_profile.card_holder_name or kyc_profile.bank_name or kyc_profile.card_last4 or kyc_profile.bank_card_image %}
+                            <div class="form-section-title">اطلاعات بانکی</div>
+                            {% if kyc_profile.card_holder_name %}
+                                <div class="info-row">
+                                    <i class="bi bi-person-vcard"></i>
+                                    <span class="info-label">نام صاحب کارت</span>
+                                    <span class="info-value">{{ kyc_profile.card_holder_name }}</span>
+                                </div>
+                            {% endif %}
+                            {% if kyc_profile.bank_name %}
+                                <div class="info-row">
+                                    <i class="bi bi-bank2"></i>
+                                    <span class="info-label">نام بانک</span>
+                                    <span class="info-value">{{ kyc_profile.bank_name }}</span>
+                                </div>
+                            {% endif %}
+                            {% if kyc_profile.card_last4 %}
+                                <div class="info-row">
+                                    <i class="bi bi-credit-card"></i>
+                                    <span class="info-label">چهار رقم آخر</span>
+                                    <span class="info-value" dir="ltr">**** **** **** {{ kyc_profile.card_last4|to_persian_digits }}</span>
+                                </div>
+                            {% endif %}
+                            {% if kyc_profile.bank_card_image %}
+                                <div class="mt-2">
+                                    <p class="img-preview-label">تصویر کارت بانکی:</p>
+                                    <a href="{{ kyc_profile.bank_card_image.url }}" target="_blank" rel="noopener">
+                                        <img src="{{ kyc_profile.bank_card_image.url }}" alt="کارت بانکی" class="img-preview">
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     </div>
 
             {% if kyc_settings and kyc_settings.guide_image %}
@@ -359,22 +414,39 @@
         {#EDITABLE FORM  (not_submitted or rejected)#}
         {% else %}
 
-            <!-- Status badge -->
-            <div class="info-card mb-4">
-                <div class="info-card-title">وضعیت فعلی</div>
-                <div class="d-flex align-items-center gap-3">
-                    {% if kyc_profile.is_rejected %}
-                        <span class="kyc-badge rejected">
-                            <i class="bi bi-x-circle-fill"></i> رد شده
-                        </span>
-                        <span class="text-muted" style="font-size:.85rem;">مدارک رد شده‌اند. اطلاعات را ویرایش و مجدداً ارسال کنید.</span>
-                    {% else %}
+            <!-- Status banner (for rejected / needs_correction / not_submitted) -->
+            {% if kyc_profile.is_needs_correction %}
+                <div class="lock-banner needs-correction mb-4">
+                    <h5><i class="bi bi-pencil-square me-2"></i>مدارک شما نیاز به اصلاح دارند</h5>
+                    <p>لطفاً اطلاعات را بررسی کنید، موارد درخواست‌شده را اصلاح نموده و مجدداً ارسال کنید.</p>
+                    {% if show_admin_note %}
+                        <div class="admin-note-box mt-2">
+                            <strong><i class="bi bi-chat-left-text-fill me-1"></i>یادداشت تیم احراز هویت:</strong>
+                            <p class="mb-0 mt-1">{{ kyc_profile.admin_note }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% elif kyc_profile.is_rejected %}
+                <div class="lock-banner rejected-editable mb-4">
+                    <h5><i class="bi bi-x-circle-fill me-2"></i>احراز هویت رد شد</h5>
+                    <p>مدارک شما تأیید نشدند. لطفاً اطلاعات را اصلاح و مجدداً ارسال کنید.</p>
+                    {% if show_admin_note %}
+                        <div class="admin-note-box mt-2">
+                            <strong><i class="bi bi-chat-left-text-fill me-1"></i>دلیل رد:</strong>
+                            <p class="mb-0 mt-1">{{ kyc_profile.admin_note }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="info-card mb-4">
+                    <div class="info-card-title">وضعیت فعلی</div>
+                    <div class="d-flex align-items-center gap-3">
                         <span class="kyc-badge not-submitted">
                             <i class="bi bi-question-circle"></i> هنوز آغاز نشده
                         </span>
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
+            {% endif %}
 
             <!-- Two-column layout when guide image is available -->
             {% if kyc_settings and kyc_settings.guide_image %}
@@ -470,6 +542,57 @@
                                             <p class="img-preview-label">تصویر فعلی:</p>
                                             <a href="{{ kyc_profile.selfie_image.url }}" target="_blank" rel="noopener">
                                                 <img src="{{ kyc_profile.selfie_image.url }}" alt="سلفی" class="img-preview">
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+
+                            <div class="form-section-title">اطلاعات بانکی <span class="text-muted fw-normal" style="font-size:.78rem;">(اختیاری)</span></div>
+                            <div class="row g-3">
+
+                                <!-- Card holder name -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.card_holder_name.id_for_label }}" class="form-label">{{ form.card_holder_name.label }}</label>
+                                    {{ form.card_holder_name }}
+                                    {% if form.card_holder_name.errors %}
+                                        <div class="invalid-feedback d-block">{% for e in form.card_holder_name.errors %}{{ e }}{% endfor %}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Bank name -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.bank_name.id_for_label }}" class="form-label">{{ form.bank_name.label }}</label>
+                                    {{ form.bank_name }}
+                                    {% if form.bank_name.errors %}
+                                        <div class="invalid-feedback d-block">{% for e in form.bank_name.errors %}{{ e }}{% endfor %}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Card last 4 digits -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.card_last4.id_for_label }}" class="form-label">{{ form.card_last4.label }}</label>
+                                    {{ form.card_last4 }}
+                                    {% if form.card_last4.errors %}
+                                        <div class="invalid-feedback d-block">{% for e in form.card_last4.errors %}{{ e }}{% endfor %}</div>
+                                    {% endif %}
+                                    <div class="form-text">دقیقاً ۴ رقم — فارسی یا لاتین قابل قبول است</div>
+                                </div>
+
+                                <!-- Bank card image -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.bank_card_image.id_for_label }}" class="form-label">{{ form.bank_card_image.label }}</label>
+                                    {{ form.bank_card_image }}
+                                    {% if form.bank_card_image.errors %}
+                                        <div class="invalid-feedback d-block">{% for e in form.bank_card_image.errors %}{{ e }}{% endfor %}</div>
+                                    {% endif %}
+                                    <div class="form-text">فرمت‌های مجاز: JPG، PNG — حداکثر ۱۰ مگابایت</div>
+                                    {% if kyc_profile.bank_card_image %}
+                                        <div class="mt-2">
+                                            <p class="img-preview-label">تصویر فعلی:</p>
+                                            <a href="{{ kyc_profile.bank_card_image.url }}" target="_blank" rel="noopener">
+                                                <img src="{{ kyc_profile.bank_card_image.url }}" alt="کارت بانکی" class="img-preview">
                                             </a>
                                         </div>
                                     {% endif %}

@@ -9,25 +9,30 @@ class KYCProfile(models.Model):
 
     Status lifecycle:
         not_submitted  →  pending  →  approved
-                                   ↘  rejected  →  pending (re-submission)
+                                   ↘  rejected         →  pending (re-submission)
+                                   ↘  needs_correction →  pending (re-submission)
 
     Lock rules:
-        not_submitted  →  editable, uploads allowed
-        rejected       →  editable, uploads allowed
-        pending        →  READ-ONLY (under review)
-        approved       →  READ-ONLY (permanently locked)
+        not_submitted    →  editable, uploads allowed
+        rejected         →  editable, uploads allowed
+        needs_correction →  editable, uploads allowed (admin note shown)
+        pending          →  READ-ONLY (under review)
+        approved         →  READ-ONLY (permanently locked — national_id, DoB,
+                            documents, and bank card info cannot be changed)
     """
 
-    STATUS_NOT_SUBMITTED = 'not_submitted'
-    STATUS_PENDING  = 'pending'
-    STATUS_APPROVED = 'approved'
-    STATUS_REJECTED = 'rejected'
+    STATUS_NOT_SUBMITTED   = 'not_submitted'
+    STATUS_PENDING         = 'pending'
+    STATUS_APPROVED        = 'approved'
+    STATUS_REJECTED        = 'rejected'
+    STATUS_NEEDS_CORRECTION = 'needs_correction'
 
     STATUS_CHOICES = [
-        (STATUS_NOT_SUBMITTED, 'تکمیل نشده'),
-        (STATUS_PENDING,       'در انتظار بررسی'),
-        (STATUS_APPROVED,      'تأیید شده'),
-        (STATUS_REJECTED,      'رد شده'),
+        (STATUS_NOT_SUBMITTED,    'تکمیل نشده'),
+        (STATUS_PENDING,          'در انتظار بررسی'),
+        (STATUS_APPROVED,         'تأیید شده'),
+        (STATUS_REJECTED,         'رد شده'),
+        (STATUS_NEEDS_CORRECTION, 'نیاز به اصلاح'),
     ]
 
     user = models.OneToOneField(
@@ -66,8 +71,39 @@ class KYCProfile(models.Model):
         blank=True,
         verbose_name='سلفی با کارت ملی',
     )
+
+    # ── Banking information ────────────────────────────────────────────────
+    card_holder_name = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name='نام صاحب کارت',
+    )
+    bank_name = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='نام بانک',
+    )
+    card_last4 = models.CharField(
+        max_length=4,
+        blank=True,
+        verbose_name='چهار رقم آخر کارت',
+    )
+    bank_card_image = models.ImageField(
+        upload_to='kyc/bank_cards/',
+        null=True,
+        blank=True,
+        verbose_name='تصویر کارت بانکی',
+    )
+
+    # ── Admin review ───────────────────────────────────────────────────────
+    admin_note = models.TextField(
+        blank=True,
+        verbose_name='یادداشت ادمین',
+        help_text='این یادداشت هنگام رد یا درخواست اصلاح به مشتری نمایش داده می‌شود.',
+    )
+
     status = models.CharField(
-        max_length=13,
+        max_length=20,
         choices=STATUS_CHOICES,
         default=STATUS_NOT_SUBMITTED,
         db_index=True,
@@ -104,6 +140,10 @@ class KYCProfile(models.Model):
     @property
     def is_rejected(self):
         return self.status == self.STATUS_REJECTED
+
+    @property
+    def is_needs_correction(self):
+        return self.status == self.STATUS_NEEDS_CORRECTION
 
     @property
     def is_locked(self):

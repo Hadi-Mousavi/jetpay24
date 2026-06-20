@@ -616,10 +616,11 @@
             font-weight: 600;
         }
 
-        .kyc-badge.pending  { background: var(--jp-primary-lightest); color: var(--jp-primary-dark); }
-        .kyc-badge.approved { background: #d1e7dd; color: #0a3622; }
-        .kyc-badge.rejected { background: #f8d7da; color: #58151c; }
-        .kyc-badge.none     { background: #e9ecef; color: #495057; }
+        .kyc-badge.pending           { background: var(--jp-primary-lightest); color: var(--jp-primary-dark); }
+        .kyc-badge.approved          { background: #d1e7dd; color: #0a3622; }
+        .kyc-badge.rejected          { background: #f8d7da; color: #58151c; }
+        .kyc-badge.needs-correction  { background: #fff3cd; color: #664d03; }
+        .kyc-badge.none              { background: #e9ecef; color: #495057; }
 
         /* ── Footer ────────────────────────────────── */
         .footer {
@@ -810,6 +811,10 @@
                                         <span class="kyc-badge pending">
                                             <i class="bi bi-clock-fill"></i> در انتظار بررسی
                                         </span>
+                                    {% elif kyc_profile.status == 'needs_correction' %}
+                                        <span class="kyc-badge needs-correction">
+                                            <i class="bi bi-pencil-square"></i> نیاز به اصلاح
+                                        </span>
                                     {% elif kyc_profile.status == 'rejected' %}
                                         <span class="kyc-badge rejected">
                                             <i class="bi bi-x-circle-fill"></i> رد شده
@@ -872,6 +877,10 @@
                                     <span class="kyc-badge pending">
                                         <i class="bi bi-clock-fill"></i> در انتظار بررسی
                                     </span>
+                                {% elif kyc_profile.status == 'needs_correction' %}
+                                    <span class="kyc-badge needs-correction">
+                                        <i class="bi bi-pencil-square"></i> نیاز به اصلاح
+                                    </span>
                                 {% elif kyc_profile.status == 'rejected' %}
                                     <span class="kyc-badge rejected">
                                         <i class="bi bi-x-circle-fill"></i> رد شده
@@ -882,6 +891,20 @@
                                     </span>
                                 {% endif %}
                             </div>
+
+                            {# Admin note box — shown for rejected/needs_correction when a note exists #}
+                            {% if kyc_profile.admin_note and kyc_profile.status == 'needs_correction' %}
+                                <div class="alert alert-warning py-2 px-3 mb-3" style="font-size:.85rem;border-radius:.6rem;">
+                                    <strong><i class="bi bi-pencil-square me-1"></i>یادداشت تیم احراز هویت:</strong>
+                                    <p class="mb-0 mt-1">{{ kyc_profile.admin_note }}</p>
+                                </div>
+                            {% elif kyc_profile.admin_note and kyc_profile.status == 'rejected' %}
+                                <div class="alert alert-danger py-2 px-3 mb-3" style="font-size:.85rem;border-radius:.6rem;">
+                                    <strong><i class="bi bi-exclamation-triangle-fill me-1"></i>دلیل رد:</strong>
+                                    <p class="mb-0 mt-1">{{ kyc_profile.admin_note }}</p>
+                                </div>
+                            {% endif %}
+
                             {% if kyc_profile.national_id %}
                             <div class="info-row">
                                 <i class="bi bi-card-text"></i>
@@ -918,6 +941,10 @@
                             {% elif kyc_profile.status == 'pending' %}
                                 <a href="{% url 'kyc_submit' %}" style="font-size:0.82rem;color:var(--jp-primary-medium);text-decoration:none;">
                                     <i class="bi bi-hourglass-split me-1"></i>مشاهده وضعیت
+                                </a>
+                            {% elif kyc_profile.status == 'needs_correction' %}
+                                <a href="{% url 'kyc_submit' %}" style="font-size:0.82rem;color:#854d0e;text-decoration:none;font-weight:600;">
+                                    <i class="bi bi-pencil-square me-1"></i>اصلاح و ارسال مجدد
                                 </a>
                             {% elif kyc_profile.status == 'rejected' %}
                                 <a href="{% url 'kyc_submit' %}" style="font-size:0.82rem;color:#842029;text-decoration:none;">
