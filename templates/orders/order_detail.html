@@ -241,6 +241,38 @@
             {% endfor %}
         {% endif %}
 
+        {% if action_required %}
+        {# ── Waiting-customer action banner ──────────────────────────────── #}
+        <div class="payment-banner" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fde68a;animation:action-pulse 2s infinite;margin-bottom:1rem;">
+            <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-person-exclamation text-warning" style="font-size:1.5rem;flex-shrink:0;margin-top:.1rem;"></i>
+                <div>
+                    <h6 class="fw-bold mb-1" style="color:#664d03;">⚠️ این سفارش نیاز به اقدام شما دارد</h6>
+                    <p class="mb-0" style="font-size:.88rem;color:#7c5c02;">
+                        تیم جت‌پی‌۲۴ منتظر اطلاعات یا اقدام بیشتر از سوی شما است.
+                        لطفاً بخش پیام‌ها را مطالعه کنید و پاسخ دهید.
+                    </p>
+                    {% if latest_history and latest_history.note %}
+                    <div class="mt-2 p-2" style="background:rgba(0,0,0,.05);border-radius:.4rem;font-size:.84rem;color:#5c4f00;">
+                        <strong>یادداشت ادمین:</strong> {{ latest_history.note }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% elif latest_history and latest_history.note %}
+        {# ── Show latest status note when there is one ───────────────────── #}
+        <div class="payment-banner" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd;margin-bottom:1rem;">
+            <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-info-circle text-info" style="font-size:1.2rem;flex-shrink:0;margin-top:.1rem;"></i>
+                <div>
+                    <h6 class="fw-bold mb-1" style="font-size:.88rem;color:#0c4a6e;">یادداشت تیم جت‌پی‌۲۴</h6>
+                    <p class="mb-0" style="font-size:.88rem;color:#075985;">{{ latest_history.note }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Order details -->
         <div class="jp-card">
             <div class="card-title">جزئیات سفارش</div>
@@ -450,6 +482,11 @@
                                     <div class="timeline-title-wrap">
                                         <p class="timeline-title">{{ event.title }}</p>
                                         <div class="timeline-event-time">{{ event.timestamp|to_jalali_datetime }}</div>
+                                        {% if event.note %}
+                                        <div class="mt-1 px-2 py-1" style="background:rgba(0,0,0,.05);border-radius:.35rem;font-size:.8rem;color:#374151;line-height:1.5;">
+                                            {{ event.note }}
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

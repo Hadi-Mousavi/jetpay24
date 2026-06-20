@@ -23,6 +23,10 @@ def _timestamp_key(ts):
 
 
 def _event_color(event):
+    # Status-history events carry a pre-computed color hint; honour it first.
+    if 'color_hint' in event:
+        return event['color_hint']
+
     sort_order = event.get('sort_order', 0)
     title = event.get('title', '')
     emoji = event.get('emoji', '')
@@ -37,6 +41,14 @@ def _event_color(event):
         return 'indigo'
     if sort_order == 40:
         return 'gray'
+    if sort_order in (45, 46, 47):   # payment events
+        if emoji == '💳' or 'رسید' in title:
+            return 'yellow'
+        if emoji == '💰' or 'تأیید' in title:
+            return 'green'
+        if emoji == '❌' or 'رد' in title:
+            return 'red'
+        return 'yellow'
     if sort_order == 20:
         if emoji == '🚀' or 'در حال انجام' in title:
             return 'orange'
@@ -44,9 +56,9 @@ def _event_color(event):
             return 'yellow'
         if emoji == '✅' or 'تکمیل' in title:
             return 'green'
-        if emoji == '❌' or 'رد' in title:
+        if emoji == '❌' or 'رد' in title or 'لغو' in title:
             return 'red'
-        if emoji == '💳' or 'پرداخت' in title:
+        if emoji in ('💳', '⚠️') or 'پرداخت' in title or 'اقدام' in title:
             return 'yellow'
         return 'primary'
     return 'primary'

@@ -73,6 +73,8 @@ def dashboard(request):
             filter=Q(status__in=[Order.STATUS_SUBMITTED, Order.STATUS_UNDER_REVIEW]),
         ),
         in_progress_orders=Count('id', filter=Q(status=Order.STATUS_IN_PROGRESS)),
+        waiting_customer_orders=Count('id', filter=Q(status=Order.STATUS_WAITING_CUSTOMER)),
+        pending_payment_orders=Count('id', filter=Q(status=Order.STATUS_WAITING_PAYMENT)),
         completed_orders=Count('id', filter=Q(status=Order.STATUS_COMPLETED)),
     )
 

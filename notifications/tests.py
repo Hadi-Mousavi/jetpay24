@@ -48,12 +48,14 @@ class NotificationSignalTests(TestCase):
         self.assertIn(order.order_number, note.message)
 
     def test_order_status_changed_notification(self):
+        """Status changes now fire specific notification types, not a generic one."""
         order = _make_order(self.customer, self.cat, self.sub)
         Notification.objects.all().delete()
         order.status = Order.STATUS_IN_PROGRESS
         order.save()
         note = Notification.objects.get(user=self.customer)
-        self.assertEqual(note.notification_type, Notification.TYPE_ORDER_STATUS_CHANGED)
+        # in_progress fires TYPE_ORDER_IN_PROGRESS (specific workflow notification)
+        self.assertEqual(note.notification_type, Notification.TYPE_ORDER_IN_PROGRESS)
 
     def test_admin_message_notification(self):
         order = _make_order(self.customer, self.cat, self.sub)

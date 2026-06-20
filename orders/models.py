@@ -117,36 +117,42 @@ class SubCategory(models.Model):
 
 class Order(models.Model):
 
-    STATUS_DRAFT           = 'draft'
-    STATUS_SUBMITTED       = 'submitted'
-    STATUS_UNDER_REVIEW    = 'under_review'
-    STATUS_WAITING_PAYMENT = 'waiting_customer_payment'
-    STATUS_IN_PROGRESS     = 'in_progress'
-    STATUS_COMPLETED       = 'completed'
-    STATUS_REJECTED        = 'rejected'
-    STATUS_CANCELLED       = 'cancelled'
+    STATUS_DRAFT             = 'draft'
+    STATUS_SUBMITTED         = 'submitted'
+    STATUS_UNDER_REVIEW      = 'under_review'
+    STATUS_WAITING_PAYMENT   = 'waiting_customer_payment'
+    STATUS_PAYMENT_REJECTED  = 'payment_rejected'
+    STATUS_IN_PROGRESS       = 'in_progress'
+    STATUS_WAITING_CUSTOMER  = 'waiting_customer'
+    STATUS_COMPLETED         = 'completed'
+    STATUS_REJECTED          = 'rejected'
+    STATUS_CANCELLED         = 'cancelled'
 
     STATUS_CHOICES = [
-        (STATUS_DRAFT,           'پیش‌نویس'),
-        (STATUS_SUBMITTED,       'ثبت شده'),
-        (STATUS_UNDER_REVIEW,    'در حال بررسی'),
-        (STATUS_WAITING_PAYMENT, 'در انتظار پرداخت'),
-        (STATUS_IN_PROGRESS,     'در حال انجام'),
-        (STATUS_COMPLETED,       'تکمیل شده'),
-        (STATUS_REJECTED,        'رد شده'),
-        (STATUS_CANCELLED,       'لغو شده'),
+        (STATUS_DRAFT,            'پیش‌نویس'),
+        (STATUS_SUBMITTED,        'ثبت شده'),
+        (STATUS_UNDER_REVIEW,     'در حال بررسی'),
+        (STATUS_WAITING_PAYMENT,  'در انتظار پرداخت'),
+        (STATUS_PAYMENT_REJECTED, 'پرداخت رد شده'),
+        (STATUS_IN_PROGRESS,      'در حال انجام'),
+        (STATUS_WAITING_CUSTOMER, 'منتظر اقدام مشتری'),
+        (STATUS_COMPLETED,        'تکمیل شده'),
+        (STATUS_REJECTED,         'رد شده'),
+        (STATUS_CANCELLED,        'لغو شده'),
     ]
 
     # Maps status → Bootstrap colour token
     STATUS_COLORS = {
-        STATUS_DRAFT:           'secondary',
-        STATUS_SUBMITTED:       'primary',
-        STATUS_UNDER_REVIEW:    'info',
-        STATUS_WAITING_PAYMENT: 'warning',
-        STATUS_IN_PROGRESS:     'primary',
-        STATUS_COMPLETED:       'success',
-        STATUS_REJECTED:        'danger',
-        STATUS_CANCELLED:       'secondary',
+        STATUS_DRAFT:            'secondary',
+        STATUS_SUBMITTED:        'primary',
+        STATUS_UNDER_REVIEW:     'info',
+        STATUS_WAITING_PAYMENT:  'warning',
+        STATUS_PAYMENT_REJECTED: 'danger',
+        STATUS_IN_PROGRESS:      'primary',
+        STATUS_WAITING_CUSTOMER: 'warning',
+        STATUS_COMPLETED:        'success',
+        STATUS_REJECTED:         'danger',
+        STATUS_CANCELLED:        'secondary',
     }
 
     order_number      = models.CharField(
@@ -305,3 +311,67 @@ class OrderMessageAttachment(models.Model):
     @property
     def filename(self):
         return self.file.name.split('/')[-1]
+
+
+class OrderStatusHistory(models.Model):
+    """
+    Immutable audit log of every admin-initiated status transition.
+
+    Created by OrderAdmin.save_model() whenever the order status changes.
+    Used to:
+      - Render a detailed timeline on the order detail page.
+      - Show customers the reason/note for each status change.
+      - Provide an audit trail for support staff.
+    """
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='status_history',
+        verbose_name='سفارش',
+    )
+    old_status = models.CharField(
+        max_length=30,
+        verbose_name='وضعیت قبلی',
+    )
+    new_status = models.CharField(
+        max_length=30,
+        verbose_name='وضعیت جدید',
+        db_index=True,
+    )
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='status_changes',
+        limit_choices_to={'is_staff': True},
+        verbose_name='تغییر داده‌شده توسط',
+    )
+    note = models.TextField(
+        blank=True,
+        verbose_name='یادداشت تغییر وضعیت',
+        help_text='این یادداشت برای مشتری قابل مشاهده است.',
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='تاریخ تغییر',
+    )
+
+    class Meta:
+        ordering        = ['-created_at', '-id']
+        verbose_name    = 'تاریخچه وضعیت'
+        verbose_name_plural = 'تاریخچه وضعیت‌ها'
+
+    def __str__(self):
+        return (
+            f'{self.order.order_number}: '
+            f'{self.old_status} → {self.new_status}'
+        )
+
+    @property
+    def new_status_label(self):
+        return dict(Order.STATUS_CHOICES).get(self.new_status, self.new_status)
+
+    @property
+    def old_status_label(self):
+        return dict(Order.STATUS_CHOICES).get(self.old_status, self.old_status)

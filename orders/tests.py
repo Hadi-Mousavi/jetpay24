@@ -42,7 +42,12 @@ from kyc.models import KYCProfile
 
 from .models import (
     Category, Order, OrderAttachment,
-    OrderCounter, OrderMessage, OrderMessageAttachment, SubCategory,
+    OrderCounter, OrderMessage, OrderMessageAttachment,
+    OrderStatusHistory, SubCategory,
+)
+from .workflow import (
+    InvalidTransition, get_allowed_transitions,
+    is_valid_transition, validate_transition,
 )
 
 User = get_user_model()

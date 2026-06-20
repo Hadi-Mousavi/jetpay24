@@ -29,22 +29,45 @@ def _kyc_profile(user):
 
 _STATUS_TIMELINE = {
     Order.STATUS_UNDER_REVIEW: (
-        'سفارش در حال بررسی قرار گرفت', 'bi-search', '🔍',
+        'سفارش در حال بررسی قرار گرفت', 'bi-search', '🔍', 'yellow',
     ),
     Order.STATUS_WAITING_PAYMENT: (
-        'سفارش در انتظار پرداخت قرار گرفت', 'bi-credit-card', '💳',
+        'سفارش در انتظار پرداخت قرار گرفت', 'bi-credit-card', '💳', 'yellow',
+    ),
+    Order.STATUS_PAYMENT_REJECTED: (
+        'پرداخت رد شد', 'bi-credit-card-fill', '❌', 'red',
     ),
     Order.STATUS_IN_PROGRESS: (
-        'سفارش در حال انجام قرار گرفت', 'bi-rocket-takeoff-fill', '🚀',
+        'سفارش در حال انجام قرار گرفت', 'bi-rocket-takeoff-fill', '🚀', 'orange',
+    ),
+    Order.STATUS_WAITING_CUSTOMER: (
+        'سفارش منتظر اقدام شما است', 'bi-person-exclamation', '⚠️', 'yellow',
     ),
     Order.STATUS_COMPLETED: (
-        'سفارش تکمیل شد', 'bi-check-circle-fill', '✅',
+        'سفارش تکمیل شد', 'bi-check-circle-fill', '✅', 'green',
     ),
     Order.STATUS_REJECTED: (
-        'سفارش رد شد', 'bi-x-circle-fill', '❌',
+        'سفارش رد شد', 'bi-x-circle-fill', '❌', 'red',
     ),
     Order.STATUS_CANCELLED: (
-        'سفارش لغو شد', 'bi-slash-circle', '🚫',
+        'سفارش لغو شد', 'bi-slash-circle', '🚫', 'red',
+    ),
+}
+
+# Maps status → (title, icon, emoji, color) for status history events
+_HISTORY_STATUS_MAP = {
+    k: v for k, v in _STATUS_TIMELINE.items()
+}
+
+# Recovery/reopen transitions get their own title/icon (keyed by (old, new) pair)
+_REOPEN_EVENT_MAP = {
+    ('completed', 'in_progress'): (
+        'سفارش بازگشایی شد و به مرحله در حال انجام بازگشت',
+        'bi-arrow-counterclockwise', '🔄', 'orange',
+    ),
+    ('cancelled', 'under_review'): (
+        'سفارش لغوشده مجدداً به مرحله بررسی بازگشت',
+        'bi-arrow-counterclockwise', '🔄', 'yellow',
     ),
 }
 
@@ -64,14 +87,43 @@ def _build_order_timeline(order):
         'sort_order': 10,
     })
 
-    if order.status in _STATUS_TIMELINE:
-        title, icon, emoji = _STATUS_TIMELINE[order.status]
+    # Use status history records if available (workflow engine).
+    # Fall back to the current-status single event for older orders.
+    from .models import OrderStatusHistory as _History
+    history_qs = list(order.status_history.select_related('changed_by').all())
+    if history_qs:
+        for h in history_qs:
+            # Recovery/reopen events take priority over generic status mapping
+            reopen_meta = _REOPEN_EVENT_MAP.get((h.old_status, h.new_status))
+            if reopen_meta:
+                h_title, h_icon, h_emoji, h_color = reopen_meta
+            else:
+                meta = _HISTORY_STATUS_MAP.get(h.new_status)
+                if meta:
+                    h_title, h_icon, h_emoji, h_color = meta
+                else:
+                    h_title = f'وضعیت به «{h.new_status_label}» تغییر کرد'
+                    h_icon  = 'bi-arrow-repeat'
+                    h_emoji = '🔄'
+                    h_color = 'blue'
+            events.append({
+                'title':      h_title,
+                'emoji':      h_emoji,
+                'icon':       h_icon,
+                'timestamp':  h.created_at,
+                'sort_order': 20,
+                'color_hint': h_color,
+                'note':       h.note,
+            })
+    elif order.status in _STATUS_TIMELINE:
+        title, icon, emoji, color = _STATUS_TIMELINE[order.status]
         events.append({
-            'title': title,
-            'emoji': emoji,
-            'icon': icon,
-            'timestamp': order.updated_at,
+            'title':      title,
+            'emoji':      emoji,
+            'icon':       icon,
+            'timestamp':  order.updated_at,
             'sort_order': 20,
+            'color_hint': color,
         })
 
     if order.assigned_admin_id:
@@ -177,6 +229,11 @@ def _render_order_detail(request, order, msg_form=None, attach_form=None):
     has_pending_payment = any(p.status == Payment.STATUS_SUBMITTED for p in payments)
     payment_form   = PaymentSubmitForm()
 
+    # Status history — latest entry first, for showing the most recent note
+    status_history = list(order.status_history.select_related('changed_by').all())
+    latest_history  = status_history[0] if status_history else None
+    action_required = order.status == Order.STATUS_WAITING_CUSTOMER
+
     return render(request, 'orders/order_detail.html', {
         'order':              order,
         'order_msgs':         order_msgs,
@@ -189,6 +246,10 @@ def _render_order_detail(request, order, msg_form=None, attach_form=None):
         'latest_payment':     latest_payment,
         'has_pending_payment': has_pending_payment,
         'payment_form':       payment_form,
+        # workflow
+        'status_history':     status_history,
+        'latest_history':     latest_history,
+        'action_required':    action_required,
     })
 
 

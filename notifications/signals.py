@@ -35,12 +35,79 @@ def _notify_order_events(sender, instance, created, **kwargs):
         return
 
     previous = getattr(instance, '_previous_status', None)
-    if previous and previous != instance.status:
+    if not previous or previous == instance.status:
+        return
+
+    num = instance.order_number
+
+    # Status-specific notifications with meaningful messages.
+    # Recovery (reopen) transitions are checked BEFORE the regular branches
+    # so they get a distinct notification type and message.
+    if instance.status == Order.STATUS_IN_PROGRESS and previous == Order.STATUS_COMPLETED:
+        create_notification(
+            user=instance.user,
+            title='سفارش مجدداً فعال شد 🔄',
+            message=(
+                f'سفارش {num} که قبلاً تکمیل‌شده بود، مجدداً بازگشایی شد '
+                f'و به مرحله در حال انجام بازگشت.'
+            ),
+            notification_type=Notification.TYPE_ORDER_REOPENED,
+        )
+    elif instance.status == Order.STATUS_UNDER_REVIEW and previous == Order.STATUS_CANCELLED:
+        create_notification(
+            user=instance.user,
+            title='سفارش برای بررسی مجدد بازگشایی شد 🔄',
+            message=(
+                f'سفارش {num} که قبلاً لغو شده بود، مجدداً بازگشایی شد '
+                f'و برای ادامه بررسی فعال است.'
+            ),
+            notification_type=Notification.TYPE_ORDER_REACTIVATED,
+        )
+    elif instance.status == Order.STATUS_UNDER_REVIEW:
+        create_notification(
+            user=instance.user,
+            title='سفارش در حال بررسی است',
+            message=f'سفارش {num} وارد مرحله بررسی شد. به زودی با شما تماس خواهیم گرفت.',
+            notification_type=Notification.TYPE_ORDER_IN_REVIEW,
+        )
+    elif instance.status == Order.STATUS_IN_PROGRESS:
+        create_notification(
+            user=instance.user,
+            title='سفارش در حال انجام است',
+            message=f'سفارش {num} وارد مرحله انجام شد. تیم جت‌پی‌۲۴ مشغول پردازش است.',
+            notification_type=Notification.TYPE_ORDER_IN_PROGRESS,
+        )
+    elif instance.status == Order.STATUS_WAITING_CUSTOMER:
+        create_notification(
+            user=instance.user,
+            title='⚠️ سفارش نیاز به اقدام شما دارد',
+            message=(
+                f'سفارش {num} منتظر پاسخ شما است. '
+                'لطفاً به صفحه سفارش مراجعه کنید.'
+            ),
+            notification_type=Notification.TYPE_ORDER_WAITING_CUSTOMER,
+        )
+    elif instance.status == Order.STATUS_COMPLETED:
+        create_notification(
+            user=instance.user,
+            title='سفارش تکمیل شد ✅',
+            message=f'سفارش {num} با موفقیت تکمیل شد. از اعتماد شما سپاسگزاریم.',
+            notification_type=Notification.TYPE_ORDER_COMPLETED,
+        )
+    elif instance.status == Order.STATUS_CANCELLED:
+        create_notification(
+            user=instance.user,
+            title='سفارش لغو شد',
+            message=f'سفارش {num} لغو شد. در صورت سؤال با پشتیبانی تماس بگیرید.',
+            notification_type=Notification.TYPE_ORDER_CANCELLED,
+        )
+    else:
+        # Generic fallback for any other status change
         create_notification(
             user=instance.user,
             title='وضعیت سفارش تغییر کرد',
             message=(
-                f'وضعیت سفارش {instance.order_number} '
+                f'وضعیت سفارش {num} '
                 f'به «{instance.status_label}» تغییر یافت.'
             ),
             notification_type=Notification.TYPE_ORDER_STATUS_CHANGED,

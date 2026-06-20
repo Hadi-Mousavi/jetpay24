@@ -236,9 +236,35 @@
         .status-submitted,
         .status-in_progress { background: #cfe2ff; color: #084298; }
         .status-under_review { background: #cff4fc; color: #055160; }
-        .status-waiting_customer_payment { background: #fff3cd; color: #664d03; }
+        .status-waiting_customer_payment,
+        .status-waiting_customer { background: #fff3cd; color: #664d03; }
+        .status-payment_rejected { background: #f8d7da; color: #58151c; }
         .status-completed { background: #d1e7dd; color: #0a3622; }
         .status-rejected { background: #f8d7da; color: #58151c; }
+
+        /* Action-required pulse on waiting_customer orders */
+        @keyframes action-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.5); }
+            70%  { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+        }
+        .action-required-row { background: rgba(255, 243, 205, 0.4); }
+        .action-required-row:hover { background: rgba(255, 243, 205, 0.7); }
+        .action-required-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffc107;
+            border-radius: 50rem;
+            padding: 0.1rem 0.55rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            animation: action-pulse 1.5s infinite;
+        }
+        .stat-card-icon.action { background: rgba(255, 193, 7, 0.15); color: #664d03; }
+        .stat-card-icon.payment { background: rgba(25, 118, 210, 0.1); color: #1976d2; }
 
         .recent-orders-table th {
             font-size: 0.78rem;
@@ -784,6 +810,28 @@
                             <div class="stat-card-value">{{ in_progress_orders|default:0 }}</div>
                         </div>
                     </div>
+                    {% if waiting_customer_orders %}
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="stat-card" style="border: 1.5px solid #ffc107;">
+                            <div class="stat-card-icon action">
+                                <i class="bi bi-person-exclamation"></i>
+                            </div>
+                            <div class="stat-card-label">نیاز به اقدام شما</div>
+                            <div class="stat-card-value" style="color:#664d03;">{{ waiting_customer_orders }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if pending_payment_orders %}
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="stat-card">
+                            <div class="stat-card-icon payment">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div class="stat-card-label">در انتظار پرداخت</div>
+                            <div class="stat-card-value">{{ pending_payment_orders }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="col-6 col-md-4 col-xl">
                         <div class="stat-card">
                             <div class="stat-card-icon completed">
@@ -975,11 +1023,16 @@
                             </thead>
                             <tbody>
                                 {% for order in recent_orders %}
-                                <tr>
+                                <tr{% if order.status == 'waiting_customer' %} class="action-required-row"{% endif %}>
                                     <td>
                                         <span class="fw-semibold" dir="ltr" style="font-size:0.85rem;letter-spacing:0.03em;">
                                             {{ order.order_number }}
                                         </span>
+                                        {% if order.status == 'waiting_customer' %}
+                                        <br><span class="action-required-badge mt-1">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> نیاز به اقدام
+                                        </span>
+                                        {% endif %}
                                     </td>
                                     <td class="service-cell">
                                         {{ order.category.title }}
